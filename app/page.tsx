@@ -7,9 +7,11 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
 import { CustomCursor } from "@/src/components/CustomCursor";
-import { LaptopScene, SceneTexts } from "@/src/components/3d/LaptopScene";
+import { LaptopScene } from "@/src/components/3d/LaptopScene";
 import { Portfolio } from "@/src/components/Portfolio";
 import { Company } from "@/src/components/Company";
+import { NeuralBackground } from "@/src/components/3d/NeuralBackground";
+import { SceneTexts } from "@/src/components/3d/SceneTexts";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -38,6 +40,8 @@ export default function Home() {
       className="relative w-full bg-[#050505] text-white selection:bg-violet-500/30 overflow-hidden font-sans"
     >
       <CustomCursor />
+
+      <NeuralBackground />
 
       {/*
         SceneTexts : composant HTML normal monté ICI, hors du Canvas.

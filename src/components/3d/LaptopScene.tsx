@@ -7,6 +7,11 @@ import { useGSAP } from "@gsap/react";
 import { useFrame } from "@react-three/fiber";
 import gsap from "gsap";
 import { GLTF } from "three-stdlib";
+import {
+  Breakpoint,
+  getBreakpoint,
+  useBreakpoint,
+} from "@/src/hooks/useBreakpoint";
 
 useGLTF.preload("/models/macbook-m5-pro.glb");
 
@@ -90,357 +95,82 @@ const DRAG_SENSITIVITY = 0.003;
 const DRAG_MAX = THREE.MathUtils.degToRad(20);
 
 const SCENE_THRESHOLDS = {
-  scene2: 0.23,
-  scene3: 0.41,
-  scene4: 0.6,
+  scene2: 0.22,
+  scene3: 0.38,
+  scene4: 0.5,
   close: 0.75,
 };
 
-// ─── Portal textes : composant React NORMAL (pas dans le Canvas) ──────────────
-// Rendu via createPortal dans <body>, complètement hors du tree R3F.
-// On l'exporte pour le monter depuis page.tsx, EN DEHORS du <Canvas>.
-export function SceneTexts() {
-  const [mounted, setMounted] = useState(false);
+const TEX_FADE_DURATION = 0.45;
 
-  // S'assure qu'on est côté client (Next.js SSR safety)
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-  if (!mounted) return null;
+// ─── Config 3D par breakpoint ─────────────────────────────────────────────────
+const RESPONSIVE_3D = {
+  desktop: {
+    initFromY: -3.5,
+    initRestY: -1.8,
+    initFromRotY: THREE.MathUtils.degToRad(8),
+    openRestY: -1.2,
+    scaleOpen: 0.15,
+    scaleClose: 0.13,
+    scene2: { x: -1.2, y: -1.75, z: 0.5 },
+    scene2rot: {
+      y: THREE.MathUtils.degToRad(42),
+      x: THREE.MathUtils.degToRad(-2),
+    },
+    scene3: { x: 1.2, y: -1.75, z: 0.5 },
+    scene3rot: {
+      y: THREE.MathUtils.degToRad(-42),
+      x: THREE.MathUtils.degToRad(-2),
+    },
+    scene4: { x: 0, y: -1.0, z: -0.4 },
+    scene5: { y: -1.2, z: -1 },
+  },
+  tablet: {
+    initFromY: -3.2,
+    initRestY: -1.6,
+    initFromRotY: THREE.MathUtils.degToRad(6),
+    openRestY: -1.0,
+    scaleOpen: 0.11,
+    scaleClose: 0.1,
+    scene2: { x: -0.7, y: -1.5, z: 0 },
+    scene2rot: {
+      y: THREE.MathUtils.degToRad(30),
+      x: THREE.MathUtils.degToRad(-2),
+    },
+    scene3: { x: 0.7, y: -1.5, z: 0.3 },
+    scene3rot: {
+      y: THREE.MathUtils.degToRad(-30),
+      x: THREE.MathUtils.degToRad(-2),
+    },
+    scene4: { x: 0, y: -0.8, z: 0 },
+    scene5: { y: -1.0, z: 0 },
+  },
+  mobile: {
+    initFromY: -1.0,
+    initRestY: -1.0, // MacBook repose bas de l'écran
+    initFromRotY: THREE.MathUtils.degToRad(4),
+    openRestY: -1.5, // reste en bas après ouverture
+    scaleOpen: 0.09,
+    scaleClose: 0.08,
+    // ✅ Pas de translation X — rotation sur place uniquement
+    scene2: { x: 0, y: -1.5, z: 0 },
+    scene2rot: {
+      y: THREE.MathUtils.degToRad(25),
+      x: THREE.MathUtils.degToRad(-2),
+    },
+    scene3: { x: 0, y: -1.5, z: 0 },
+    scene3rot: {
+      y: THREE.MathUtils.degToRad(-25),
+      x: THREE.MathUtils.degToRad(-2),
+    },
+    scene4: { x: 0, y: -1.2, z: 0 },
+    scene5: { y: -1.0, z: 0 },
+  },
+} as const;
 
-  return createPortal(
-    <div
-      id="scene-texts-portal"
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 15,
-        pointerEvents: "none",
-        overflow: "hidden",
-        color: "white",
-      }}
-    >
-      {/* SCENE 1 — hero centré */}
-      <div
-        className="scene-1-text"
-        style={{
-          position: "absolute",
-          inset: 0,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "0 2rem",
-        }}
-      >
-        <p
-          style={{
-            fontSize: "0.7rem",
-            fontWeight: 700,
-            textTransform: "uppercase",
-            letterSpacing: "0.5em",
-            color: "#60a5fa",
-            marginBottom: "1rem",
-          }}
-        >
-          Studio Digital d'Exception
-        </p>
-        <h1
-          style={{
-            fontSize: "clamp(2.5rem, 6vw, 5rem)",
-            fontWeight: 300,
-            textAlign: "center",
-            lineHeight: 0.95,
-            marginBottom: "1.5rem",
-          }}
-        >
-          Solutions{" "}
-          <em style={{ color: "#a78bfa", fontFamily: "Georgia, serif" }}>
-            digitales
-          </em>
-          <br />
-          <strong
-            style={{
-              fontWeight: 900,
-              textTransform: "uppercase",
-              letterSpacing: "-0.03em",
-            }}
-          >
-            sur mesure.
-          </strong>
-        </h1>
-        <p
-          style={{
-            color: "rgba(255,255,255,0.4)",
-            fontSize: "1.1rem",
-            fontWeight: 300,
-          }}
-        >
-          Scroll pour explorer →
-        </p>
-        <div
-          style={{
-            position: "absolute",
-            bottom: "3rem",
-            left: "50%",
-            transform: "translateX(-50%)",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "0.75rem",
-          }}
-        >
-          <div
-            style={{
-              height: "4rem",
-              width: "1px",
-              background:
-                "linear-gradient(to bottom, transparent, rgba(255,255,255,0.5))",
-            }}
-          />
-          <p
-            style={{
-              fontSize: "0.6rem",
-              textTransform: "uppercase",
-              letterSpacing: "0.4em",
-              color: "rgba(255,255,255,0.3)",
-            }}
-          >
-            Scroll
-          </p>
-        </div>
-      </div>
-
-      {/* SCENE 2 — droite */}
-      <div
-        className="scene-2-text"
-        style={{
-          position: "absolute",
-          inset: 0,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "flex-end",
-          padding: "0 clamp(2rem, 8vw, 5rem)",
-          opacity: 0,
-        }}
-      >
-        <div style={{ maxWidth: "420px", textAlign: "right" }}>
-          <p
-            style={{
-              fontSize: "0.7rem",
-              fontWeight: 700,
-              textTransform: "uppercase",
-              letterSpacing: "0.4em",
-              color: "#a78bfa",
-              marginBottom: "0.75rem",
-            }}
-          >
-            01 — Solutions Web
-          </p>
-          <h2
-            style={{
-              fontSize: "clamp(2rem, 4vw, 3rem)",
-              fontWeight: 300,
-              lineHeight: 1,
-              marginBottom: "1.25rem",
-            }}
-          >
-            Sites web{" "}
-            <strong style={{ display: "block", fontWeight: 900 }}>
-              haute performance.
-            </strong>
-          </h2>
-          <p
-            style={{
-              color: "rgba(255,255,255,0.5)",
-              fontSize: "1rem",
-              fontWeight: 300,
-              lineHeight: 1.6,
-              marginBottom: "1.5rem",
-            }}
-          >
-            Des interfaces immersives pensées pour convertir, avec des
-            animations fluides et une UX irréprochable.
-          </p>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "0.5rem",
-              alignItems: "flex-end",
-            }}
-          >
-            {["Next.js", "React", "Three.js", "GSAP"].map((tech) => (
-              <span
-                key={tech}
-                style={{
-                  padding: "0.2rem 1rem",
-                  borderRadius: "999px",
-                  border: "1px solid rgba(167,139,250,0.3)",
-                  fontSize: "0.65rem",
-                  fontWeight: 700,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.15em",
-                  color: "#a78bfa",
-                }}
-              >
-                {tech}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* SCENE 3 — gauche */}
-      <div
-        className="scene-3-text"
-        style={{
-          position: "absolute",
-          inset: 0,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "flex-start",
-          padding: "0 clamp(2rem, 8vw, 5rem)",
-          opacity: 0,
-        }}
-      >
-        <div style={{ maxWidth: "420px", textAlign: "left" }}>
-          <p
-            style={{
-              fontSize: "0.7rem",
-              fontWeight: 700,
-              textTransform: "uppercase",
-              letterSpacing: "0.4em",
-              color: "#60a5fa",
-              marginBottom: "0.75rem",
-            }}
-          >
-            02 — Applications Mobile
-          </p>
-          <h2
-            style={{
-              fontSize: "clamp(2rem, 4vw, 3rem)",
-              fontWeight: 300,
-              lineHeight: 1,
-              marginBottom: "1.25rem",
-            }}
-          >
-            <strong style={{ display: "block", fontWeight: 900 }}>
-              Scalable.
-            </strong>
-            <em style={{ color: "#60a5fa", fontFamily: "Georgia, serif" }}>
-              Élégant.
-            </em>
-            <span style={{ display: "block" }}>Puissant.</span>
-          </h2>
-          <p
-            style={{
-              color: "rgba(255,255,255,0.5)",
-              fontSize: "1rem",
-              fontWeight: 300,
-              lineHeight: 1.6,
-              marginBottom: "1.5rem",
-            }}
-          >
-            Des dashboards et applications mobiles sur mesure, conçus pour les
-            entreprises en croissance.
-          </p>
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}
-          >
-            {["React Native", "TypeScript", "Supabase", "Stripe"].map(
-              (tech) => (
-                <span
-                  key={tech}
-                  style={{
-                    padding: "0.2rem 1rem",
-                    borderRadius: "999px",
-                    border: "1px solid rgba(96,165,250,0.3)",
-                    fontSize: "0.65rem",
-                    fontWeight: 700,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.15em",
-                    color: "#60a5fa",
-                    width: "fit-content",
-                  }}
-                >
-                  {tech}
-                </span>
-              ),
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* SCENE 4 — bas */}
-      <div
-        className="scene-4-text"
-        style={{
-          position: "absolute",
-          bottom: "4rem",
-          left: 0,
-          right: 0,
-          display: "flex",
-          justifyContent: "center",
-          opacity: 0,
-          padding: "0 2rem",
-        }}
-      >
-        <div style={{ maxWidth: "640px", textAlign: "center" }}>
-          <p
-            style={{
-              fontSize: "0.7rem",
-              fontWeight: 700,
-              textTransform: "uppercase",
-              letterSpacing: "0.4em",
-              color: "#34d399",
-              marginBottom: "0.75rem",
-            }}
-          >
-            03 — Résultats
-          </p>
-          <h2
-            style={{
-              fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)",
-              fontWeight: 300,
-              lineHeight: 1.1,
-              marginBottom: "1rem",
-            }}
-          >
-            <strong style={{ fontWeight: 900 }}>+200 projets</strong> livrés.{" "}
-            <em style={{ color: "#34d399", fontFamily: "Georgia, serif" }}>
-              99.9% uptime.
-            </em>
-          </h2>
-          <p
-            style={{
-              color: "rgba(255,255,255,0.4)",
-              fontWeight: 300,
-              fontSize: "1rem",
-            }}
-          >
-            Des solutions robustes qui perdurent dans le temps.
-          </p>
-        </div>
-      </div>
-
-      {/* SCENE 5 — overlay fermeture */}
-      <div
-        className="scene-5-overlay"
-        style={{
-          position: "absolute",
-          inset: 0,
-          background: "#050505",
-          opacity: 0,
-          zIndex: 10,
-        }}
-      />
-    </div>,
-    document.body,
-  );
-}
-
-// ─── Composant 3D principal (rendu DANS le Canvas) ────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// LaptopScene
+// ─────────────────────────────────────────────────────────────────────────────
 export function LaptopScene() {
   const macbookRef = useRef<THREE.Group>(null);
   const dragWrapperRef = useRef<THREE.Group>(null);
@@ -450,12 +180,17 @@ export function LaptopScene() {
 
   const isClosedRef = useRef(false);
   const currentTexRef = useRef(-1);
+  const texTransitionRef = useRef<gsap.core.Tween | null>(null);
+  const screenProxy = useRef({ intensity: 0 });
 
   const isDragging = useRef(false);
   const dragOffset = useRef({ x: 0, y: 0 });
   const dragCurrent = useRef({ x: 0, y: 0 });
   const dragStart = useRef({ mouseX: 0, mouseY: 0, rotX: 0, rotY: 0 });
   const returnTween = useRef<gsap.core.Tween | null>(null);
+
+  const bp = useBreakpoint();
+  const cfg = RESPONSIVE_3D[bp];
 
   const { nodes } = useGLTF(
     "/models/macbook-m5-pro.glb",
@@ -469,6 +204,7 @@ export function LaptopScene() {
   ]);
   const texturesRef = useRef<THREE.Texture[]>([]);
 
+  // ─── Setup matériau & hinge ────────────────────────────────────────────────
   useEffect(() => {
     [tex1, tex2, tex3, tex4].forEach((tex) => {
       tex.colorSpace = THREE.SRGBColorSpace;
@@ -482,7 +218,7 @@ export function LaptopScene() {
         map: tex1,
         emissiveMap: tex1,
         emissive: new THREE.Color(0xffffff),
-        emissiveIntensity: 0.6,
+        emissiveIntensity: 0,
         roughness: 0.05,
         metalness: 0.0,
       });
@@ -505,7 +241,11 @@ export function LaptopScene() {
     });
   }, [nodes, tex1, tex2, tex3, tex4]);
 
+  // ─── Drag events ──────────────────────────────────────────────────────────
   useEffect(() => {
+    // Direction dominante du geste touch courant
+    const touchDir = { dominant: null as "horizontal" | "vertical" | null };
+
     const onMouseDown = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       if (target.closest("a, button, input, select, textarea, [data-no-drag]"))
@@ -529,6 +269,7 @@ export function LaptopScene() {
       if (!isDragging.current) return;
       const dx = e.clientX - dragStart.current.mouseX;
       const dy = e.clientY - dragStart.current.mouseY;
+      // Desktop : X et Y libres
       dragOffset.current.y = THREE.MathUtils.clamp(
         dragStart.current.rotY + dx * DRAG_SENSITIVITY,
         -DRAG_MAX,
@@ -564,6 +305,7 @@ export function LaptopScene() {
         returnTween.current.kill();
         returnTween.current = null;
       }
+      touchDir.dominant = null;
       const t = e.touches[0];
       isDragging.current = true;
       dragStart.current = {
@@ -577,23 +319,54 @@ export function LaptopScene() {
     const onTouchMove = (e: TouchEvent) => {
       if (!isDragging.current) return;
       const t = e.touches[0];
-      dragOffset.current.y = THREE.MathUtils.clamp(
-        dragStart.current.rotY +
-          (t.clientX - dragStart.current.mouseX) * DRAG_SENSITIVITY,
-        -DRAG_MAX,
-        DRAG_MAX,
-      );
-      dragOffset.current.x = THREE.MathUtils.clamp(
-        dragStart.current.rotX +
-          (t.clientY - dragStart.current.mouseY) * DRAG_SENSITIVITY,
-        -DRAG_MAX,
-        DRAG_MAX,
-      );
+      const dx = t.clientX - dragStart.current.mouseX;
+      const dy = t.clientY - dragStart.current.mouseY;
+
+      // Détermine la direction dominante au premier mouvement significatif
+      if (
+        touchDir.dominant === null &&
+        (Math.abs(dx) > 4 || Math.abs(dy) > 4)
+      ) {
+        touchDir.dominant =
+          Math.abs(dx) > Math.abs(dy) ? "horizontal" : "vertical";
+      }
+
+      const currentBp = getBreakpoint(window.innerWidth);
+
+      if (currentBp === "mobile" || currentBp === "tablet") {
+        // ✅ Mobile & Tablette :
+        // - Geste vertical → scroll natif, on ne touche à rien
+        // - Geste horizontal → rotation Y uniquement (gauche/droite sur place)
+        if (touchDir.dominant === "vertical") return;
+
+        // Rotation Y gauche/droite via glissement horizontal
+        dragOffset.current.y = THREE.MathUtils.clamp(
+          dragStart.current.rotY + dx * DRAG_SENSITIVITY * 0.8,
+          -DRAG_MAX,
+          DRAG_MAX,
+        );
+        // ✅ X bloqué à 0 — pas de tilt haut/bas
+        dragOffset.current.x = 0;
+      } else {
+        // Desktop : comportement original X + Y
+        if (touchDir.dominant === "vertical") return;
+        dragOffset.current.y = THREE.MathUtils.clamp(
+          dragStart.current.rotY + dx * DRAG_SENSITIVITY,
+          -DRAG_MAX,
+          DRAG_MAX,
+        );
+        dragOffset.current.x = THREE.MathUtils.clamp(
+          dragStart.current.rotX + dy * DRAG_SENSITIVITY,
+          -DRAG_MAX,
+          DRAG_MAX,
+        );
+      }
     };
 
     const onTouchEnd = () => {
       if (!isDragging.current) return;
       isDragging.current = false;
+      touchDir.dominant = null;
       returnTween.current = gsap.to(dragOffset.current, {
         x: 0,
         y: 0,
@@ -630,22 +403,80 @@ export function LaptopScene() {
     dragWrapperRef.current.rotation.y = dragCurrent.current.y;
   });
 
+  // ─── setTexture cross-fade ─────────────────────────────────────────────────
   const setTexture = (index: number) => {
     if (currentTexRef.current === index) return;
-    currentTexRef.current = index;
-    const tex = texturesRef.current[index];
-    if (!tex || !screenMeshRef.current) return;
+    if (!screenMeshRef.current) return;
     const mat = screenMeshRef.current.material as THREE.MeshStandardMaterial;
-    mat.map = tex;
-    mat.emissiveMap = tex;
-    mat.emissiveIntensity = 0.6;
-    mat.needsUpdate = true;
+    const nextTex = texturesRef.current[index];
+    if (!nextTex) return;
+    if (texTransitionRef.current) {
+      texTransitionRef.current.kill();
+      texTransitionRef.current = null;
+    }
+    currentTexRef.current = index;
+    texTransitionRef.current = gsap.to(mat, {
+      emissiveIntensity: 0,
+      duration: TEX_FADE_DURATION / 2,
+      ease: "power2.in",
+      onUpdate: () => {
+        mat.needsUpdate = true;
+      },
+      onComplete: () => {
+        mat.map = nextTex;
+        mat.emissiveMap = nextTex;
+        mat.needsUpdate = true;
+        texTransitionRef.current = gsap.to(mat, {
+          emissiveIntensity: 0.6,
+          duration: TEX_FADE_DURATION / 2,
+          ease: "power2.out",
+          onUpdate: () => {
+            mat.needsUpdate = true;
+          },
+          onComplete: () => {
+            texTransitionRef.current = null;
+          },
+        });
+      },
+    });
   };
 
+  // ─── GSAP timelines (dépend du breakpoint) ────────────────────────────────
   useGSAP(() => {
-    if (!macbookRef.current) return;
+    if (!macbookRef.current || !lidPivotRef.current) return;
 
-    // Timeline 3D
+    gsap.killTweensOf(macbookRef.current.position);
+    gsap.killTweensOf(macbookRef.current.rotation);
+    gsap.killTweensOf(macbookRef.current.scale);
+    gsap.killTweensOf(lidPivotRef.current.rotation);
+    gsap.killTweensOf(screenProxy.current);
+
+    const canvasEl = document.getElementById("canvas-container");
+
+    // ── Intro ────────────────────────────────────────────────────────────────
+    const tlIntro = gsap.timeline({ delay: 0.2 });
+
+    if (canvasEl) {
+      tlIntro.to(
+        canvasEl,
+        { opacity: 1, duration: 0.9, ease: "power2.inOut" },
+        0,
+      );
+    }
+    tlIntro.fromTo(
+      macbookRef.current.position,
+      { y: cfg.initFromY },
+      { y: cfg.initRestY, duration: 1.0, ease: "power3.out" },
+      0,
+    );
+    tlIntro.fromTo(
+      macbookRef.current.rotation,
+      { y: cfg.initFromRotY },
+      { y: 0, duration: 1.0, ease: "power3.out" },
+      0,
+    );
+
+    // ── Scroll 3D ────────────────────────────────────────────────────────────
     const tl3d = gsap.timeline({
       scrollTrigger: {
         trigger: "#scroll-wrapper",
@@ -654,10 +485,21 @@ export function LaptopScene() {
         scrub: 1,
         onUpdate: (self) => {
           const p = self.progress;
+
+          if (screenMeshRef.current) {
+            const mat = screenMeshRef.current
+              .material as THREE.MeshStandardMaterial;
+            if (!texTransitionRef.current) {
+              mat.emissiveIntensity = screenProxy.current.intensity;
+              mat.needsUpdate = true;
+            }
+          }
+
           if (p < SCENE_THRESHOLDS.scene2) setTexture(0);
           else if (p < SCENE_THRESHOLDS.scene3) setTexture(1);
           else if (p < SCENE_THRESHOLDS.scene4) setTexture(2);
           else if (p < SCENE_THRESHOLDS.close) setTexture(3);
+
           if (p > SCENE_THRESHOLDS.close && !isClosedRef.current) {
             isClosedRef.current = true;
             closeLid();
@@ -669,58 +511,62 @@ export function LaptopScene() {
       },
     });
 
-    const canvasEl = document.getElementById("canvas-container");
-    if (canvasEl)
-      tl3d.to(canvasEl, { opacity: 1, duration: 1, ease: "power2.inOut" }, 0);
+    // Phase 0 : ouverture couvercle
+    tl3d.to(
+      macbookRef.current.position,
+      { y: cfg.openRestY, duration: 1, ease: "power2.out" },
+      0,
+    );
+    tl3d.to(
+      lidPivotRef.current.rotation,
+      { x: LID_OPEN_ANGLE, duration: 1, ease: "power2.inOut" },
+      0,
+    );
+    tl3d.to(
+      screenProxy.current,
+      { intensity: 0.6, duration: 0.7, ease: "power2.out" },
+      0.3,
+    );
 
+    // Phase 1 : scène 2
     tl3d.to(
       macbookRef.current.scale,
-      { x: 0.15, y: 0.15, z: 0.15, duration: 1.2, ease: "power3.out" },
-      0,
-    );
-    tl3d.to(
-      macbookRef.current.position,
-      { y: -1.5, duration: 1.2, ease: "power3.out" },
-      0,
-    );
-    tl3d.to(
-      macbookRef.current.rotation,
-      { x: THREE.MathUtils.degToRad(-4), duration: 1.2, ease: "power3.out" },
-      0,
-    );
-    tl3d.to(
-      macbookRef.current.position,
-      { x: -1.2, y: -1.75, z: 0.5, duration: 1, ease: "power2.inOut" },
-      1,
-    );
-    tl3d.to(
-      macbookRef.current.rotation,
       {
-        y: THREE.MathUtils.degToRad(42),
-        x: THREE.MathUtils.degToRad(-2),
-        duration: 1,
-        ease: "power2.inOut",
+        x: cfg.scaleOpen,
+        y: cfg.scaleOpen,
+        z: cfg.scaleOpen,
+        duration: 1.2,
+        ease: "power3.out",
       },
       1,
     );
     tl3d.to(
       macbookRef.current.position,
-      { x: 1.2, y: -1.75, z: 0.5, duration: 1, ease: "power2.inOut" },
+      { ...cfg.scene2, duration: 1, ease: "power2.inOut" },
+      1,
+    );
+    tl3d.to(
+      macbookRef.current.rotation,
+      { ...cfg.scene2rot, duration: 1, ease: "power2.inOut" },
+      1,
+    );
+
+    // Phase 2 : scène 3
+    tl3d.to(
+      macbookRef.current.position,
+      { ...cfg.scene3, duration: 1, ease: "power2.inOut" },
       2,
     );
     tl3d.to(
       macbookRef.current.rotation,
-      {
-        y: THREE.MathUtils.degToRad(-42),
-        x: THREE.MathUtils.degToRad(-2),
-        duration: 1,
-        ease: "power2.inOut",
-      },
+      { ...cfg.scene3rot, duration: 1, ease: "power2.inOut" },
       2,
     );
+
+    // Phase 3 : scène 4
     tl3d.to(
       macbookRef.current.position,
-      { x: 0, y: -1.0, z: -0.4, duration: 1.2, ease: "power3.inOut" },
+      { ...cfg.scene4, duration: 1.2, ease: "power3.inOut" },
       3,
     );
     tl3d.to(
@@ -728,18 +574,30 @@ export function LaptopScene() {
       { x: 0, y: 0, duration: 1.2, ease: "power3.inOut" },
       3,
     );
+
+    // Phase 4 : fermeture
     tl3d.to(
       macbookRef.current.position,
-      { y: -1.2, z: -1, duration: 1, ease: "power3.in" },
+      { ...cfg.scene5, duration: 1, ease: "power3.in" },
       4,
     );
     tl3d.to(
       macbookRef.current.scale,
-      { x: 0.13, y: 0.13, z: 0.13, duration: 1, ease: "power3.in" },
-      5,
+      {
+        x: cfg.scaleClose,
+        y: cfg.scaleClose,
+        z: cfg.scaleClose,
+        duration: 1,
+        ease: "power3.in",
+      },
+      6,
     );
 
-    // Timeline textes (synchronisée sur le même scroll-wrapper)
+    // ── Scroll textes ────────────────────────────────────────────────────────
+    const isMob = bp === "mobile";
+    const isTab = bp === "tablet";
+    const isTouch = isMob || isTab;
+
     const tlText = gsap.timeline({
       scrollTrigger: {
         trigger: "#scroll-wrapper",
@@ -748,38 +606,60 @@ export function LaptopScene() {
         scrub: 1,
       },
     });
+
     tlText.to(
       ".scene-1-text",
-      { opacity: 0, y: -30, duration: 0.4, ease: "power2.in" },
-      0.7,
+      {
+        scale: 0.7,
+        opacity: 0,
+        filter: "blur(2px)",
+        y: -10,
+        duration: 0.2,
+        ease: "power2.in",
+      },
+      0,
     );
+
+    // ✅ Mobile/Tablette : transition verticale (y) au lieu de horizontale (x)
     tlText.fromTo(
       ".scene-2-text",
-      { opacity: 0, x: 60 },
-      { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" },
-      1,
+      { opacity: 0, x: isTouch ? 0 : 60, y: isTouch ? 20 : 0 },
+      { opacity: 1, x: 0, y: 0, duration: 0.5, ease: "power3.out" },
+      1.2,
     );
     tlText.to(
       ".scene-2-text",
-      { opacity: 0, x: 60, duration: 0.4, ease: "power2.in" },
-      1.7,
+      {
+        opacity: 0,
+        x: isTouch ? 0 : 60,
+        y: isTouch ? -20 : 0,
+        duration: 0.4,
+        ease: "power2.in",
+      },
+      1.5,
     );
     tlText.fromTo(
       ".scene-3-text",
-      { opacity: 0, x: -60 },
-      { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" },
+      { opacity: 0, x: isTouch ? 0 : -60, y: isTouch ? 20 : 0 },
+      { opacity: 1, x: 0, y: 0, duration: 0.5, ease: "power3.out" },
       2,
     );
     tlText.to(
       ".scene-3-text",
-      { opacity: 0, x: -60, duration: 0.4, ease: "power2.in" },
-      2.7,
+      {
+        opacity: 0,
+        x: isTouch ? 0 : -60,
+        y: isTouch ? -20 : 0,
+        duration: 0.4,
+        ease: "power2.in",
+      },
+      2.3,
     );
     tlText.fromTo(
       ".scene-4-text",
       { opacity: 0, y: 40 },
       { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" },
-      3,
+      2.8,
     );
     tlText.to(
       ".scene-4-text",
@@ -789,10 +669,23 @@ export function LaptopScene() {
     tlText.to(
       ".scene-5-overlay",
       { opacity: 1, duration: 0.8, ease: "power2.in" },
-      4.2,
+      4,
     );
-  }, []);
+    tlText.fromTo(
+      ".scene-5-discover",
+      { opacity: 0, y: -30, filter: "blur(6px)" },
+      {
+        opacity: 1,
+        y: 0,
+        filter: "blur(0px)",
+        duration: 0.6,
+        ease: "power3.out",
+      },
+      4,
+    );
+  }, [bp]);
 
+  // ─── closeLid / openLid ────────────────────────────────────────────────────
   const closeLid = () => {
     if (!lidPivotRef.current || !screenMeshRef.current) return;
     gsap.to(lidPivotRef.current.rotation, {
@@ -830,13 +723,12 @@ export function LaptopScene() {
     });
   };
 
-  // Rendu purement Three.js — aucun élément HTML ici
   return (
     <group ref={dragWrapperRef}>
       <group
         ref={macbookRef}
-        position={[0, -1.0, 0]}
-        scale={0.08}
+        position={[0, cfg.initFromY, 0]}
+        scale={cfg.scaleClose}
         dispose={null}
       >
         <group rotation={[Math.PI / 2, 0, 0]}>
@@ -851,7 +743,7 @@ export function LaptopScene() {
               />
             ) : null,
           )}
-          <group ref={lidPivotRef} rotation={[LID_OPEN_ANGLE, 0, 0]}>
+          <group ref={lidPivotRef} rotation={[LID_CLOSE_ANGLE, 0, 0]}>
             <group ref={lidMeshesRef}>
               {LID_MESHES.map((name) =>
                 nodes[name] ? (
