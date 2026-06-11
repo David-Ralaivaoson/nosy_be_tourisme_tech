@@ -1,27 +1,17 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
-const HandDrawnOval = ({
-  width,
-  height,
-}: {
-  width: number;
-  height: number;
-}) => {
+const HandDrawnOval = () => {
   const pathRef = useRef<SVGPathElement>(null);
   const path2Ref = useRef<SVGPathElement>(null);
 
-  const padX = 32;
-  const padY = 22;
-  const W = width - padX * 3;
-  const H = height + padY * 2;
+  // ViewBox et paths TOTALEMENT FIXES — ne dépendent d'aucune mesure
+  const VW = 700;
+  const VH = 160;
+  const cx = VW / 2;
+  const cy = VH / 2;
+  const rx = VW / 2 - 18;
+  const ry = VH / 2 - 14;
 
-  const cx = W / 2;
-  const cy = H / 2;
-  const rx = W / 2 - 20;
-  const ry = H / 2 - 20;
-
-  // Ovale qui commence à ~10h, tourne dans le sens horaire
-  // et dépasse son point de départ (intersection visible)
   const mainPath = `
     M ${cx - rx * 0.3} ${cy - ry + 1}
     C ${cx + rx * 0.1} ${cy - ry - 5},
@@ -44,33 +34,26 @@ const HandDrawnOval = ({
       ${cx - rx * 0.05} ${cy - ry + 5}
   `;
 
-  // Second passage — décalé, plus court, s'arrête avant la fin
-  // pour laisser le "gap" visible à l'intersection
   const texPath = `
-    M ${cx - rx * 0.3} ${cy - ry + 1}
-    C ${cx + rx * 0.1} ${cy - ry - 5},
-      ${cx + rx * 0.6} ${cy - ry - 3},
-      ${cx + rx - 10} ${cy - ry * 0.35}
-    C ${cx + rx + 10} ${cy + ry * 0.1},
-      ${cx + rx + 5} ${cy + ry * 0.55},
-      ${cx + rx - 6} ${cy + ry * 0.85}
-    C ${cx + rx * 0.55} ${cy + ry + 7},
-      ${cx} ${cy + ry + 8},
-      ${cx - rx * 0.55} ${cy + ry + 5}
-    C ${cx - rx + 4} ${cy + ry + 2},
-      ${cx - rx - 4} ${cy + ry * 0.5},
-      ${cx - rx - 3} ${cy - ry * 0.1}
-    C ${cx - rx - 2} ${cy - ry * 0.55},
-      ${cx - rx * 0.6} ${cy - ry - 4},
-      ${cx - rx * 0.15} ${cy - ry - 1}
-    C ${cx + rx * 0.05} ${cy - ry - 3},
-      ${cx + rx * 0.2} ${cy - ry + 3},
-      ${cx - rx * 0.05} ${cy - ry + 5}
+    M ${cx - rx * 0.28} ${cy - ry + 3}
+    C ${cx + rx * 0.12} ${cy - ry - 3},
+      ${cx + rx * 0.58} ${cy - ry - 1},
+      ${cx + rx - 8} ${cy - ry * 0.3}
+    C ${cx + rx + 8} ${cy + ry * 0.15},
+      ${cx + rx + 3} ${cy + ry * 0.6},
+      ${cx + rx - 8} ${cy + ry * 0.9}
+    C ${cx + rx * 0.5} ${cy + ry + 9},
+      ${cx} ${cy + ry + 10},
+      ${cx - rx * 0.5} ${cy + ry + 7}
+    C ${cx - rx + 6} ${cy + ry + 4},
+      ${cx - rx - 2} ${cy + ry * 0.45},
+      ${cx - rx - 1} ${cy - ry * 0.05}
+    C ${cx - rx} ${cy - ry * 0.5},
+      ${cx - rx * 0.55} ${cy - ry - 2},
+      ${cx - rx * 0.18} ${cy - ry + 1}
   `;
 
   useEffect(() => {
-    if (width === 0 || height === 0) return;
-
     const main = pathRef.current;
     const tex = path2Ref.current;
     if (!main || !tex) return;
@@ -97,25 +80,24 @@ const HandDrawnOval = ({
     }, 800);
 
     return () => clearTimeout(t);
-  }, [width, height]);
-
-  if (width === 0 || height === 0) return null;
+  }, []);
 
   return (
     <svg
-      viewBox={`0 0 ${W} ${H}`}
+      viewBox={`0 0 ${VW} ${VH}`}
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
+      preserveAspectRatio="xMidYMid meet"
       style={{
         position: "absolute",
         top: "50%",
         left: "50%",
         transform: "translate(-50%, -50%)",
-        width: `${W}px`,
-        height: `${H}px`,
+        width: "115%",
+        height: "140%",
         overflow: "visible",
         pointerEvents: "none",
-        zIndex: 0,
+        zIndex: 20,
       }}
     >
       <defs>
@@ -168,26 +150,24 @@ const HandDrawnOval = ({
         </filter>
       </defs>
 
-      {/* Second passage en dessous — texture */}
       <path
         ref={path2Ref}
         d={texPath}
         fill="none"
         stroke="#E8430A"
-        strokeWidth="2.5"
+        strokeWidth="3"
         strokeLinecap="round"
         strokeLinejoin="round"
         filter="url(#crayon-oval-light)"
         style={{ opacity: 0.45 }}
       />
 
-      {/* Trait principal par dessus */}
       <path
         ref={pathRef}
         d={mainPath}
         fill="none"
         stroke="#E8430A"
-        strokeWidth="5"
+        strokeWidth="6"
         strokeLinecap="round"
         strokeLinejoin="round"
         filter="url(#crayon-oval)"
@@ -204,42 +184,23 @@ export const SurMesureHeading = ({
   isMobile: boolean;
   isTablet: boolean;
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [dims, setDims] = useState({ width: 0, height: 0 });
-
-  useEffect(() => {
-    const measure = () => {
-      if (!containerRef.current) return;
-      const { width, height } = containerRef.current.getBoundingClientRect();
-      setDims({ width, height });
-    };
-
-    // Légère attente pour que le fade-up soit appliqué
-    const t = setTimeout(measure, 50);
-    window.addEventListener("resize", measure);
-    return () => {
-      clearTimeout(t);
-      window.removeEventListener("resize", measure);
-    };
-  }, [isMobile, isTablet]);
-
   return (
     <div
-      ref={containerRef}
       style={{
         position: "relative",
         display: "block",
+        padding: "0.1em 0.15em",
       }}
     >
-      <HandDrawnOval width={dims.width} height={dims.height} />
+      <HandDrawnOval />
 
       <h1
         style={{
           fontSize: isMobile
-            ? "clamp(1.7rem, 8vw, 2.5rem)"
+            ? "clamp(1.5rem, 8vw, 2.5rem)"
             : isTablet
               ? "clamp(2.1rem, 5.5vw, 3.5rem)"
-              : "clamp(2.8rem, 6vw, 5rem)",
+              : "clamp(2rem, 6vw, 5rem)",
           fontWeight: 800,
           lineHeight: 1,
           letterSpacing: "-0.045em",

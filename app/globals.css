@@ -267,3 +267,13 @@ body {
     @apply font-sans;
   }
 }
+
+/* Force tous les portails Radix au-dessus de tout */
+[data-radix-popper-content-wrapper] {
+  z-index: 99999 !important;
+}
+
+/* Pour le tooltip spécifiquement */
+[role="tooltip"] {
+  z-index: 99999 !important;
+}

@@ -96,8 +96,8 @@ const DRAG_MAX = THREE.MathUtils.degToRad(20);
 
 const SCENE_THRESHOLDS = {
   scene2: 0.22,
-  scene3: 0.38,
-  scene4: 0.5,
+  scene3: 0.36,
+  scene4: 0.53,
   close: 0.75,
 };
 
@@ -625,7 +625,7 @@ export function LaptopScene() {
       ".scene-2-text",
       { opacity: 0, x: isTouch ? 0 : 60, y: isTouch ? 20 : 0 },
       { opacity: 1, x: 0, y: 0, duration: 0.5, ease: "power3.out" },
-      1.2,
+      0.7,
     );
     tlText.to(
       ".scene-2-text",
@@ -636,13 +636,13 @@ export function LaptopScene() {
         duration: 0.4,
         ease: "power2.in",
       },
-      1.5,
+      1.0,
     );
     tlText.fromTo(
       ".scene-3-text",
       { opacity: 0, x: isTouch ? 0 : -60, y: isTouch ? 20 : 0 },
       { opacity: 1, x: 0, y: 0, duration: 0.5, ease: "power3.out" },
-      2,
+      1.3,
     );
     tlText.to(
       ".scene-3-text",
@@ -653,27 +653,27 @@ export function LaptopScene() {
         duration: 0.4,
         ease: "power2.in",
       },
-      2.3,
+      1.6,
     );
     tlText.fromTo(
       ".scene-4-text",
       { opacity: 0, y: 40 },
       { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" },
-      2.8,
+      2.0,
     );
     tlText.to(
       ".scene-4-text",
       { opacity: 0, y: -20, duration: 0.4, ease: "power2.in" },
-      3.8,
+      2.4,
     );
     tlText.to(
       ".scene-5-overlay",
       { opacity: 1, duration: 0.8, ease: "power2.in" },
-      4,
+      2.7,
     );
     tlText.fromTo(
       ".scene-5-discover",
-      { opacity: 0, y: -30, filter: "blur(6px)" },
+      { opacity: 0, y: -40, filter: "blur(6px)" },
       {
         opacity: 1,
         y: 0,
@@ -681,7 +681,7 @@ export function LaptopScene() {
         duration: 0.6,
         ease: "power3.out",
       },
-      4,
+      3.0,
     );
   }, [bp]);
 

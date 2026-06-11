@@ -1046,9 +1046,9 @@ export function SceneTexts() {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            paddingTop: isMobile ? "3.5rem" : "6rem",
+            justifyContent: "center",
+            paddingBottom: isMobile ? "4.5rem" : "7rem",
             opacity: 0,
-            transform: "translateY(-20px)",
           }}
         >
           <div className="scan-overlay" />
