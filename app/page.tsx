@@ -1,4 +1,3 @@
-// app/page.tsx
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
@@ -26,6 +25,15 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { NavbarMenu } from "@/src/components/Shared/Navbar-menu";
+import { Gallery } from "@/src/components/Gallery";
+import { Accommodations } from "@/src/components/Accommodations";
+import { Gastronomy } from "@/src/components/Gastronomy";
+import { Testimonials } from "@/src/components/Testimonials";
+import { BestTime } from "@/src/components/BestTime";
+import { PracticalInfo } from "@/src/components/PracticalInfo";
+import { FAQ } from "@/src/components/FAQ";
+import { Contact } from "@/src/components/Contact";
+import { Footer } from "@/src/components/Shared/Footer";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -37,42 +45,40 @@ interface NavLink {
 
 const navLinks: NavLink[] = [
   {
-    label: "Solutions",
-    href: "#",
+    label: "Destinations",
+    href: "#destinations",
     submenu: [
-      { label: "Design System", href: "#" },
-      { label: "Web Development", href: "#" },
-      { label: "Mobile Apps", href: "#" },
+      { label: "Nosy Komba", href: "#nosy-komba" },
+      { label: "Nosy Tanikely", href: "#nosy-tanikely" },
+      { label: "Lokobe", href: "#lokobe" },
     ],
   },
   {
-    label: "Portfolio",
-    href: "#",
+    label: "Activités",
+    href: "#activites",
     submenu: [
-      { label: "Recent Projects", href: "#" },
-      { label: "Case Studies", href: "#" },
-      { label: "Gallery", href: "#" },
+      { label: "Plongée", href: "#plongee" },
+      { label: "Snorkeling", href: "#snorkeling" },
+      { label: "Excursions", href: "#excursions" },
     ],
   },
   {
-    label: "Studio",
-    href: "#",
+    label: "Hébergements",
+    href: "#hebergements",
     submenu: [
-      { label: "About Us", href: "#" },
-      { label: "Team", href: "#" },
-      { label: "Services", href: "#" },
+      { label: "Lodges", href: "#lodges" },
+      { label: "Hôtels", href: "#hotels" },
+      { label: "Bungalows", href: "#bungalows" },
     ],
   },
-  { label: "Contact", href: "#" },
+  { label: "Contact", href: "#contact" },
 ];
 
 function NavigationMenu() {
   const [openMobile, setOpenMobile] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const handleMenuItemClick = () => {
-    setOpenMobile(false);
-  };
+  const handleMenuItemClick = () => setOpenMobile(false);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -89,7 +95,6 @@ function NavigationMenu() {
 
   return (
     <>
-      {/* Desktop Navigation */}
       <nav className="hidden md:flex gap-8 text-xs font-semibold uppercase tracking-[0.2em] text-white/60 z-200">
         <TooltipProvider>
           {navLinks.map((link, idx) => (
@@ -123,11 +128,7 @@ function NavigationMenu() {
                   <TooltipTrigger>
                     <a
                       href={link.href}
-                      className={`group relative px-3 py-2 rounded-lg overflow-hidden transition-all duration-300 ${
-                        link.label === "Contact"
-                          ? "hover:text-violet-400 text-white underline underline-offset-8 decoration-violet-500"
-                          : "text-white hover:text-violet-400"
-                      }`}
+                      className={`group relative px-3 py-2 rounded-lg overflow-hidden transition-all duration-300 ${link.label === "Contact" ? "hover:text-violet-400 text-white underline underline-offset-8 decoration-violet-500" : "text-white hover:text-violet-400"}`}
                     >
                       <span className="relative z-10">{link.label}</span>
                       <div className="absolute inset-0 -z-10 bg-gradient-to-r from-violet-500/0 via-violet-500/10 to-violet-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -135,7 +136,7 @@ function NavigationMenu() {
                     </a>
                   </TooltipTrigger>
                   <TooltipContent className="bg-slate-900 border border-violet-500/30 text-white text-xs rounded-lg backdrop-blur-xl">
-                    <p>Navigate to {link.label}</p>
+                    <p>Aller à {link.label}</p>
                   </TooltipContent>
                 </Tooltip>
               )}
@@ -144,7 +145,6 @@ function NavigationMenu() {
         </TooltipProvider>
       </nav>
 
-      {/* Mobile Menu Button */}
       <button
         onClick={() => setOpenMobile(!openMobile)}
         className="md:hidden relative z-200 p-2 hover:bg-violet-500/20 rounded-lg transition-all duration-300"
@@ -157,7 +157,6 @@ function NavigationMenu() {
         )}
       </button>
 
-      {/* Mobile Navigation */}
       {openMobile && (
         <div
           ref={menuRef}
@@ -216,17 +215,39 @@ export default function Home() {
   const container = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setTimeout(() => ScrollTrigger.refresh(), 100);
     const lenis = new Lenis({
-      autoRaf: false,
-      duration: 1.2,
+      duration: 1.0, // Plus réactif que 1.2
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       touchMultiplier: 2,
+      smoothWheel: true,
     });
+
+    // Fonction nommée pour un nettoyage propre du ticker (évite les fuites en React 18 Strict Mode)
+    const onRaf = (time: number) => {
+      lenis.raf(time * 1000);
+    };
+
     lenis.on("scroll", ScrollTrigger.update);
-    gsap.ticker.add((time) => lenis.raf(time * 1000));
+    gsap.ticker.add(onRaf);
+
+    // ✅ Fonction wrapper pour satisfaire le typage EventListener de TypeScript
+    const handleRefresh = () => {
+      ScrollTrigger.refresh();
+    };
+
+    // Refresh initial après chargement du layout
+    const refreshTimer = setTimeout(() => {
+      handleRefresh();
+    }, 500);
+
+    window.addEventListener("resize", handleRefresh);
+    window.addEventListener("load", handleRefresh);
+
     return () => {
-      gsap.ticker.remove(lenis.raf);
+      clearTimeout(refreshTimer);
+      gsap.ticker.remove(onRaf); // ✅ Nettoyage parfait
+      window.removeEventListener("resize", handleRefresh);
+      window.removeEventListener("load", handleRefresh);
       lenis.destroy();
     };
   }, []);
@@ -236,18 +257,10 @@ export default function Home() {
       ref={container}
       className="relative w-full bg-[#050505] text-white selection:bg-violet-500/30 overflow-hidden font-sans"
     >
-      <CustomCursor />
-
+      {/* <CustomCursor /> */}
       <NeuralBackground />
-
-      {/*
-        SceneTexts : composant HTML normal monté ICI, hors du Canvas.
-        Il injecte les divs de scène dans <body> via createPortal.
-        GSAP les anime depuis LaptopScene via les classes .scene-X-text.
-      */}
       <SceneTexts />
 
-      {/* Background */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-125 h-125 bg-purple-900/20 rounded-full blur-[120px]" />
         <div className="absolute bottom-[-10%] right-[-10%] w-150 h-150 bg-blue-900/20 rounded-full blur-[150px]" />
@@ -260,11 +273,7 @@ export default function Home() {
         />
       </div>
 
-      {/* Nav */}
-      <div
-        className="fixed top-0 left-0 w-full z-100 pointer-events-none"
-        // Le backdrop sur un div séparé qui ne contient pas NavbarMenu
-      >
+      <div className="fixed top-0 left-0 w-full z-100 pointer-events-none">
         <div className="absolute inset-0 backdrop-blur-sm" />
       </div>
       <nav className="fixed top-0 left-0 w-full px-6 py-2 md:px-8 flex justify-between items-center pointer-events-auto z-100">
@@ -275,33 +284,12 @@ export default function Home() {
             className="size-16 object-contain"
           />
           <div className="text-sm font-bold uppercase tracking-[0.2em] text-white/80">
-            Madagascar Designer
+            Nosy Be Guide
           </div>
         </div>
         <NavbarMenu />
-        {/* <div className="hidden md:flex gap-10 text-xs font-semibold uppercase tracking-[0.2em] text-white/60">
-          <a
-            href="#"
-            className="text-white hover:text-violet-400 transition-colors"
-          >
-            Solutions
-          </a>
-          <a href="#" className="hover:text-violet-400 transition-colors">
-            Portfolio
-          </a>
-          <a href="#" className="hover:text-violet-400 transition-colors">
-            Studio
-          </a>
-          <a
-            href="#"
-            className="hover:text-violet-400 transition-colors underline underline-offset-8 decoration-violet-500"
-          >
-            Contact
-          </a>
-        </div> */}
       </nav>
 
-      {/* Canvas 3D — z-0, derrière tout */}
       <div
         id="canvas-container"
         className="fixed inset-0 z-0 pointer-events-none opacity-0"
@@ -318,7 +306,6 @@ export default function Home() {
             intensity={0.5}
             color="#6d28d9"
           />
-          {/* LaptopScene = Three.js uniquement, aucun HTML */}
           <LaptopScene />
           <ContactShadows
             position={[0, -2, 0]}
@@ -331,16 +318,23 @@ export default function Home() {
         </Canvas>
       </div>
 
-      {/* Scroll wrapper pour GSAP ScrollTrigger — doit exister dans le DOM */}
       <div
         id="scroll-wrapper"
         className="h-[600vh] w-full relative pointer-events-none"
       />
 
-      {/* Sections normales */}
       <div className="relative z-20 w-full pointer-events-auto">
         <Portfolio />
+        <Gallery />
         <Company />
+        <Accommodations />
+        <Gastronomy />
+        <Testimonials />
+        <BestTime />
+        <PracticalInfo />
+        <FAQ />
+        <Contact />
+        <Footer />
       </div>
     </div>
   );

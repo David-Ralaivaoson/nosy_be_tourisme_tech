@@ -42,7 +42,6 @@ function AnimatedCounter({
     const start = performance.now();
     const raf = (now: number) => {
       const t = Math.min((now - start) / duration, 1);
-      // ease out expo
       const eased = t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
       setValue(Math.floor(eased * target));
       if (t < 1) requestAnimationFrame(raf);
@@ -121,7 +120,6 @@ export function SceneTexts() {
   const [mounted, setMounted] = useState(false);
   const [bp, setBp] = useState<Breakpoint>("desktop");
 
-  // Visibilité des scènes pour déclencher les animations internes
   const [scene2Visible, setScene2Visible] = useState(false);
   const [scene3Visible, setScene3Visible] = useState(false);
   const [scene4Visible, setScene4Visible] = useState(false);
@@ -140,7 +138,6 @@ export function SceneTexts() {
     return () => window.removeEventListener("resize", update);
   }, []);
 
-  // Observer chaque scène pour déclencher animations internes
   useEffect(() => {
     if (!mounted) return;
     const pairs: [
@@ -152,6 +149,7 @@ export function SceneTexts() {
       [scene4Ref, setScene4Visible],
       [scene5Ref, setScene5Visible],
     ];
+
     const observers = pairs.map(([ref, setter]) => {
       const obs = new IntersectionObserver(
         ([entry]) => setter(entry.intersectionRatio > 0.15),
@@ -160,6 +158,7 @@ export function SceneTexts() {
       if (ref.current) obs.observe(ref.current);
       return obs;
     });
+
     return () => observers.forEach((o) => o.disconnect());
   }, [mounted]);
 
@@ -167,7 +166,6 @@ export function SceneTexts() {
 
   const isMobile = bp === "mobile";
   const isTablet = bp === "tablet";
-
   const mono =
     "'JetBrains Mono','SF Mono','Fira Code','IBM Plex Mono',monospace";
 
@@ -249,27 +247,23 @@ export function SceneTexts() {
           transition:all .25s ease;
         }
 
-        /* Badge pulsé */
         .pulse-dot {
           width:6px; height:6px; border-radius:50%;
           animation:pulse-dot 2.2s ease-in-out infinite;
         }
 
-        /* Watermark */
         .wmk {
           position:absolute; font-family:var(--mono); font-weight:900;
           color:rgba(255,255,255,.018); line-height:1;
           user-select:none; pointer-events:none;
         }
 
-        /* Corner accent */
         .corner { position:absolute; width:28px; height:28px; }
         .corner-tl { top:0; left:0; border-top:1px solid; border-left:1px solid; }
         .corner-tr { top:0; right:0; border-top:1px solid; border-right:1px solid; }
         .corner-bl { bottom:0; left:0; border-bottom:1px solid; border-left:1px solid; }
         .corner-br { bottom:0; right:0; border-bottom:1px solid; border-right:1px solid; }
 
-        /* Scan line pour scènes */
         .scan-overlay {
           position:absolute; inset:0; pointer-events:none; overflow:hidden;
         }
@@ -356,7 +350,9 @@ export function SceneTexts() {
                   color: "rgba(167,139,250,.7)",
                 }}
               >
-                {isMobile ? "STUDIO DIGITAL" : "STUDIO DIGITAL D'EXCEPTION"}
+                {isMobile
+                  ? "GUIDE TOURISTIQUE"
+                  : "GUIDE TOURISTIQUE DE NOSY BE"}
               </span>
             </div>
             <div
@@ -369,7 +365,7 @@ export function SceneTexts() {
             />
           </div>
 
-          {/* Headline — 3 lignes en cascade */}
+          {/* Headline */}
           <div
             style={{
               textAlign: "center",
@@ -392,7 +388,7 @@ export function SceneTexts() {
                 color: "rgba(255,255,255,.9)",
               }}
             >
-              Solutions
+              Découvrez
             </h1>
             <h1
               style={{
@@ -410,7 +406,7 @@ export function SceneTexts() {
                 animation: "fade-up .8s .12s ease both",
               }}
             >
-              <span className="g-violet">digitales</span>
+              <span className="g-violet">Nosy Be</span>
             </h1>
             <SurMesureHeading isMobile={isMobile} isTablet={isTablet} />
           </div>
@@ -497,7 +493,7 @@ export function SceneTexts() {
         </div>
 
         {/* ════════════════════════════════════════════════════════════════
-            SCENE 2 — SOLUTIONS WEB
+            SCENE 2 — DESTINATIONS & PLAGES
         ════════════════════════════════════════════════════════════════ */}
         <div
           ref={scene2Ref}
@@ -517,7 +513,6 @@ export function SceneTexts() {
           }}
         >
           <div className="scan-overlay" />
-
           <div
             style={{
               maxWidth: isMobile ? "100%" : "460px",
@@ -555,7 +550,7 @@ export function SceneTexts() {
                 transition: "opacity .5s .1s ease, transform .5s .1s ease",
               }}
             >
-              Sites web
+              Plages & Îles
             </h2>
             <h2
               style={{
@@ -571,7 +566,7 @@ export function SceneTexts() {
                 transition: "opacity .5s .18s ease, transform .5s .18s ease",
               }}
             >
-              <span className="g-violet">haute</span> performance.
+              <span className="g-violet">paradisiaques.</span>
             </h2>
 
             {/* Description */}
@@ -587,8 +582,8 @@ export function SceneTexts() {
                   transition: "opacity .6s .28s ease",
                 }}
               >
-                Des interfaces immersives pensées pour convertir, avec des
-                animations fluides et une UX irréprochable.
+                Nosy Komba, Nosy Tanikely, Lokobe... Explorez les trésors cachés
+                de l'île aux parfums et ses eaux turquoises.
               </p>
             )}
 
@@ -606,7 +601,7 @@ export function SceneTexts() {
               }}
             />
 
-            {/* Tech chips */}
+            {/* Destinations chips */}
             <div
               style={{
                 display: "flex",
@@ -616,24 +611,26 @@ export function SceneTexts() {
                 marginBottom: !isMobile ? "1.4rem" : 0,
               }}
             >
-              {["Next.js", "React", "Three.js", "GSAP"].map((tech, i) => (
-                <span
-                  key={tech}
-                  className="tech-chip"
-                  style={{
-                    border: "1px solid rgba(167,139,250,.16)",
-                    background: "rgba(167,139,250,.05)",
-                    color: "rgba(167,139,250,.65)",
-                    opacity: scene2Visible ? 1 : 0,
-                    transform: scene2Visible
-                      ? "translateY(0)"
-                      : "translateY(8px)",
-                    transition: `opacity .4s ${0.35 + i * 0.07}s ease, transform .4s ${0.35 + i * 0.07}s ease`,
-                  }}
-                >
-                  {tech}
-                </span>
-              ))}
+              {["Nosy Komba", "Nosy Tanikely", "Lokobe", "Amparihy"].map(
+                (dest, i) => (
+                  <span
+                    key={dest}
+                    className="tech-chip"
+                    style={{
+                      border: "1px solid rgba(167,139,250,.16)",
+                      background: "rgba(167,139,250,.05)",
+                      color: "rgba(167,139,250,.65)",
+                      opacity: scene2Visible ? 1 : 0,
+                      transform: scene2Visible
+                        ? "translateY(0)"
+                        : "translateY(8px)",
+                      transition: `opacity .4s ${0.35 + i * 0.07}s ease, transform .4s ${0.35 + i * 0.07}s ease`,
+                    }}
+                  >
+                    {dest}
+                  </span>
+                ),
+              )}
             </div>
 
             {/* Feature rows */}
@@ -647,9 +644,9 @@ export function SceneTexts() {
                 }}
               >
                 {[
-                  { label: "Motion-first UI", delay: 420 },
-                  { label: "Headless architecture", delay: 490 },
-                  { label: "SEO & Core Web Vitals", delay: 560 },
+                  { label: "Plages de sable blanc", delay: 420 },
+                  { label: "Eaux cristallines", delay: 490 },
+                  { label: "Réserves marines protégées", delay: 560 },
                 ].map(({ label, delay }) => (
                   <FeatureRow
                     key={label}
@@ -665,7 +662,7 @@ export function SceneTexts() {
         </div>
 
         {/* ════════════════════════════════════════════════════════════════
-            SCENE 3 — APPLICATIONS MOBILE
+            SCENE 3 — ACTIVITÉS & AVENTURES
         ════════════════════════════════════════════════════════════════ */}
         <div
           ref={scene3Ref}
@@ -685,7 +682,6 @@ export function SceneTexts() {
           }}
         >
           <div className="scan-overlay" />
-
           <div
             style={{
               maxWidth: isMobile ? "100%" : "460px",
@@ -713,9 +709,9 @@ export function SceneTexts() {
             {/* Headline */}
             <div style={{ marginBottom: isMobile ? "1rem" : "1.6rem" }}>
               {[
-                { text: "Scalable.", weight: 900, cls: "", delay: 0.1 },
-                { text: "Élégant.", weight: 200, cls: "g-blue", delay: 0.18 },
-                { text: "Puissant.", weight: 200, cls: "", delay: 0.26 },
+                { text: "Aventure.", weight: 900, cls: "", delay: 0.1 },
+                { text: "Culture.", weight: 200, cls: "g-blue", delay: 0.18 },
+                { text: "Détente.", weight: 200, cls: "", delay: 0.26 },
               ].map(({ text, weight, cls, delay }) => (
                 <h2
                   key={text}
@@ -751,8 +747,9 @@ export function SceneTexts() {
                   transition: "opacity .6s .32s ease",
                 }}
               >
-                Des dashboards et applications mobiles sur mesure, conçus pour
-                les entreprises en croissance.
+                Ylang-ylang, rhum arrangé, marchés locaux et traditions
+                sakalava. Vivez des expériences authentiques avec nos guides
+                experts.
               </p>
             )}
 
@@ -780,26 +777,24 @@ export function SceneTexts() {
                 marginBottom: !isMobile ? "1.4rem" : 0,
               }}
             >
-              {["React Native", "TypeScript", "Supabase", "Stripe"].map(
-                (tech, i) => (
-                  <span
-                    key={tech}
-                    className="tech-chip"
-                    style={{
-                      border: "1px solid rgba(96,165,250,.16)",
-                      background: "rgba(96,165,250,.05)",
-                      color: "rgba(96,165,250,.65)",
-                      opacity: scene3Visible ? 1 : 0,
-                      transform: scene3Visible
-                        ? "translateY(0)"
-                        : "translateY(8px)",
-                      transition: `opacity .4s ${0.35 + i * 0.07}s ease, transform .4s ${0.35 + i * 0.07}s ease`,
-                    }}
-                  >
-                    {tech}
-                  </span>
-                ),
-              )}
+              {["Plongée", "Snorkeling", "Randonnée", "Pêche"].map((act, i) => (
+                <span
+                  key={act}
+                  className="tech-chip"
+                  style={{
+                    border: "1px solid rgba(96,165,250,.16)",
+                    background: "rgba(96,165,250,.05)",
+                    color: "rgba(96,165,250,.65)",
+                    opacity: scene3Visible ? 1 : 0,
+                    transform: scene3Visible
+                      ? "translateY(0)"
+                      : "translateY(8px)",
+                    transition: `opacity .4s ${0.35 + i * 0.07}s ease, transform .4s ${0.35 + i * 0.07}s ease`,
+                  }}
+                >
+                  {act}
+                </span>
+              ))}
             </div>
 
             {!isMobile && (
@@ -812,9 +807,9 @@ export function SceneTexts() {
                 }}
               >
                 {[
-                  { label: "Realtime data experience", delay: 420 },
-                  { label: "Product-oriented UI systems", delay: 490 },
-                  { label: "Secure payment workflows", delay: 560 },
+                  { label: "Guides locaux certifiés", delay: 420 },
+                  { label: "Excursions sur mesure", delay: 490 },
+                  { label: "Transport inclus", delay: 560 },
                 ].map(({ label, delay }) => (
                   <FeatureRow
                     key={label}
@@ -830,7 +825,7 @@ export function SceneTexts() {
         </div>
 
         {/* ════════════════════════════════════════════════════════════════
-            SCENE 4 — RÉSULTATS
+            SCENE 4 — INFOS PRATIQUES
         ════════════════════════════════════════════════════════════════ */}
         <div
           ref={scene4Ref}
@@ -894,27 +889,27 @@ export function SceneTexts() {
             >
               {[
                 {
-                  target: 150,
+                  target: 50,
                   suffix: "+",
-                  label: "Projets livrés",
+                  label: "Îles à explorer",
                   color: "#a78bfa",
-                  sub: "depuis 2019",
+                  sub: "Archipel paradisiaque",
                   delay: 0,
                 },
                 {
-                  target: 99.9,
-                  suffix: "%",
-                  label: "Uptime garanti",
+                  target: 28,
+                  suffix: "°C",
+                  label: "Température moyenne",
                   color: "#34d399",
-                  sub: "SLA contractuel",
+                  sub: "Climat tropical",
                   delay: 200,
                 },
                 {
-                  target: 2.1,
-                  suffix: "s",
-                  label: "LCP moyen",
+                  target: 300,
+                  suffix: "j",
+                  label: "Jours de soleil",
                   color: "#60a5fa",
-                  sub: "Core Web Vitals",
+                  sub: "par an",
                   delay: 400,
                 },
               ].map((stat, i) => (
@@ -1016,7 +1011,7 @@ export function SceneTexts() {
                 transition: "opacity .6s .7s ease",
               }}
             >
-              Des solutions robustes qui perdurent dans le temps.
+              Une destination exceptionnelle toute l'année.
             </p>
           </div>
         </div>
@@ -1082,7 +1077,7 @@ export function SceneTexts() {
               transition: "opacity .5s .1s ease",
             }}
           >
-            EXPLOREZ L'UNIVERS LUMINA
+            EXPLOREZ NOSY BE HELL VILLE
           </span>
 
           {/* Titre */}
@@ -1101,7 +1096,7 @@ export function SceneTexts() {
               transition: "opacity .5s .15s ease, transform .5s .15s ease",
             }}
           >
-            Découvrez <span className="g-violet">tous</span>
+            Découvrez <span className="g-violet">toutes</span>
           </h2>
           <h2
             style={{
@@ -1119,10 +1114,10 @@ export function SceneTexts() {
               transition: "opacity .5s .22s ease, transform .5s .22s ease",
             }}
           >
-            nos services.
+            nos expériences.
           </h2>
 
-          {/* Grille services */}
+          {/* Grille expériences */}
           <div
             style={{
               display: "grid",
@@ -1136,38 +1131,38 @@ export function SceneTexts() {
             {[
               {
                 icon: "◆",
-                name: "Sites Web",
-                desc: "Next.js / React",
+                name: "Excursions",
+                desc: "Îles & Plages",
                 color: "#a78bfa",
               },
               {
                 icon: "◈",
-                name: "Apps Mobile",
-                desc: "React Native",
+                name: "Plongée",
+                desc: "Réserves marines",
                 color: "#60a5fa",
               },
               {
                 icon: "◇",
-                name: "UI/UX Design",
-                desc: "Figma / Framer",
+                name: "Hébergements",
+                desc: "Lodges & Hôtels",
                 color: "#c084fc",
               },
               {
                 icon: "▸",
-                name: "SEO",
-                desc: "Core Web Vitals",
+                name: "Culture",
+                desc: "Marchés locaux",
                 color: "#34d399",
               },
               {
                 icon: "▹",
-                name: "Branding",
-                desc: "Identité visuelle",
+                name: "Nature",
+                desc: "Réserves & Forêts",
                 color: "#f472b6",
               },
               {
                 icon: "◻",
-                name: "E-commerce",
-                desc: "Shopify / Stripe",
+                name: "Gastronomie",
+                desc: "Saveurs malgaches",
                 color: "#fb923c",
               },
             ].map((s, i) => (

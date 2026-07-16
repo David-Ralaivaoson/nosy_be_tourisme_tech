@@ -63,141 +63,139 @@ interface NavLink {
 }
 
 // ============================================================
-// DATA
+// DATA — Adapté pour le tourisme à Nosy Be
 // ============================================================
 const navLinks: NavLink[] = [
   {
-    label: "Solutions",
+    label: "Destinations",
     megamenu: true,
     featured: {
-      label: "Découvrir notre plateforme",
-      description:
-        "Une suite complète d'outils pour transformer votre entreprise",
-      href: "/platform",
+      label: "Découvrir Nosy Be",
+      description: "Explorez l'île aux parfums et ses trésors cachés",
+      href: "/destinations",
       icon: Sparkles,
       gradient: "from-violet-600 to-indigo-600",
     },
     submenu: [
       {
-        label: "Infrastructure Cloud",
-        href: "/solutions/cloud",
-        description:
-          "Déployez et gérez vos ressources cloud en toute simplicité",
+        label: "Nosy Komba",
+        href: "/destinations/nosy-komba",
+        description: "Île volcanique avec lémuriens et plages paradisiaques",
         icon: Cloud,
         badge: "Populaire",
       },
       {
-        label: "Cybersécurité",
-        href: "/solutions/security",
-        description: "Protection avancée contre les menaces modernes",
+        label: "Nosy Tanikely",
+        href: "/destinations/nosy-tanikely",
+        description: "Réserve marine protégée pour la plongée",
         icon: Shield,
-        badge: "Nouveau",
+        badge: "Incontournable",
       },
       {
-        label: "Intelligence Artificielle",
-        href: "/solutions/ai",
-        description: "Intégrez l'IA dans vos processus métier",
+        label: "Lokobe",
+        href: "/destinations/lokobe",
+        description: "Réserve naturelle avec faune endémique",
         icon: Cpu,
-        badge: "Beta",
+        badge: "Nature",
       },
       {
-        label: "Data & Analytics",
-        href: "/solutions/data",
-        description: "Transformez vos données en insights actionnables",
+        label: "Amparihy",
+        href: "/destinations/amparihy",
+        description: "Plage de sable blanc et eaux cristallines",
         icon: BarChart3,
       },
       {
-        label: "DevOps & CI/CD",
-        href: "/solutions/devops",
-        description: "Accélérez vos cycles de livraison logicielle",
+        label: "Hell Ville",
+        href: "/destinations/hell-ville",
+        description: "Capitale de Nosy Be avec marché local",
         icon: GitBranch,
       },
       {
-        label: "Base de données",
-        href: "/solutions/database",
-        description: "Solutions de stockage haute performance et fiables",
+        label: "Plantations Ylang",
+        href: "/destinations/ylang",
+        description: "Découverte de l'île aux parfums",
         icon: Database,
       },
     ],
   },
   {
-    label: "Produits",
+    label: "Activités",
     submenu: [
       {
-        label: "API Platform",
-        href: "/products/api",
-        description: "Connectez vos systèmes avec nos APIs robustes",
+        label: "Plongée",
+        href: "/activites/plongee",
+        description: "Explorez les fonds marins exceptionnels",
         icon: Code2,
       },
       {
-        label: "Global Network",
-        href: "/products/network",
-        description: "Infrastructure réseau mondiale ultra-rapide",
+        label: "Snorkeling",
+        href: "/activites/snorkeling",
+        description: "Observation des tortues et poissons tropicaux",
         icon: Globe,
       },
       {
-        label: "Zero Trust Security",
-        href: "/products/security",
-        description: "Architecture sécurité zéro confiance",
+        label: "Excursions",
+        href: "/activites/excursions",
+        description: "Circuits personnalisés en pirogue",
         icon: Lock,
       },
       {
-        label: "Performance Suite",
-        href: "/products/performance",
-        description: "Optimisez les performances de vos applications",
+        label: "Randonnée",
+        href: "/activites/randonnee",
+        description: "Découverte de la nature et villages",
         icon: Zap,
         badge: "Nouveau",
       },
     ],
   },
   {
-    label: "Ressources",
+    label: "Hébergements",
     submenu: [
       {
-        label: "Documentation",
-        href: "/docs",
-        description: "Guides complets et références API",
+        label: "Lodges",
+        href: "/hebergements/lodges",
+        description: "Hébergements de charme en bord de mer",
         icon: FileText,
       },
       {
-        label: "Blog & Insights",
-        href: "/blog",
-        description: "Articles tech, tendances et meilleures pratiques",
+        label: "Hôtels",
+        href: "/hebergements/hotels",
+        description: "Confort et services premium",
         icon: BookOpen,
       },
       {
-        label: "Tutoriels vidéo",
-        href: "/tutorials",
-        description: "Apprenez par l'exemple avec nos vidéos",
+        label: "Bungalows",
+        href: "/hebergements/bungalows",
+        description: "Authenticité et immersion locale",
         icon: PlayCircle,
       },
       {
-        label: "Support technique",
-        href: "/support",
-        description: "Notre équipe disponible 24/7 pour vous aider",
+        label: "Réservations",
+        href: "/hebergements/reservations",
+        description: "Réservez en ligne avec confirmation immédiate",
         icon: Headphones,
       },
     ],
   },
   {
-    label: "Entreprise",
+    label: "Infos Pratiques",
     submenu: [
       {
-        label: "À propos",
-        href: "/about",
-        description: "Notre mission, valeurs et histoire",
+        label: "Comment venir",
+        href: "/infos/venir",
+        description: "Vols, bateaux et transports vers Nosy Be",
         icon: Users,
       },
       {
-        label: "Carrières",
-        href: "/careers",
-        description: "Rejoignez une équipe passionnée par la tech",
+        label: "Climat",
+        href: "/infos/climat",
+        description: "Meilleures périodes pour visiter",
         icon: Sparkles,
-        badge: "On recrute",
+        badge: "Conseils",
       },
     ],
   },
-  { label: "Tarifs", href: "/pricing" },
+  { label: "Contact", href: "/contact" },
 ];
 
 // ============================================================
@@ -205,16 +203,15 @@ const navLinks: NavLink[] = [
 // ============================================================
 const badgeStyles: Record<string, string> = {
   Populaire: "bg-violet-500/20 text-violet-300 border-violet-500/30",
+  Incontournable: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
+  Nature: "bg-amber-500/20 text-amber-300 border-amber-500/30",
+  Conseils: "bg-rose-500/20 text-rose-300 border-rose-500/30",
   Nouveau: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
-  Beta: "bg-amber-500/20 text-amber-300 border-amber-500/30",
-  "On recrute": "bg-rose-500/20 text-rose-300 border-rose-500/30",
 };
 
 // ============================================================
 // ANIMATION VARIANTS
 // ============================================================
-
-// ✅ Fix: ease cubicBezier casté en tuple strict [number,number,number,number]
 const EASE_SPRING = [0.16, 1, 0.3, 1] as [number, number, number, number];
 
 const megaMenuVariants: Variants = {
@@ -268,8 +265,6 @@ const mobileMenuVariants: Variants = {
   },
 };
 
-// ✅ Fix principal : ne PAS typer avec Variants (incompatible avec custom functions)
-//    On garde le type inféré, et on caste ease correctement
 const mobileItemVariants = {
   hidden: { opacity: 0, x: -12 },
   visible: (i: number) => ({
@@ -278,7 +273,6 @@ const mobileItemVariants = {
     transition: {
       delay: i * 0.06,
       duration: 0.3,
-      // ✅ Tuple strict au lieu de number[] générique
       ease: EASE_SPRING,
     },
   }),
@@ -287,8 +281,6 @@ const mobileItemVariants = {
 // ============================================================
 // SUB-COMPONENTS
 // ============================================================
-
-/** Carte d'item pour le mega menu */
 function MegaMenuItem({ item }: { item: SubItem }) {
   const Icon = item.icon;
   return (
@@ -327,7 +319,6 @@ function MegaMenuItem({ item }: { item: SubItem }) {
   );
 }
 
-/** Carte featured dans le mega menu */
 function FeaturedCard({ featured }: { featured: FeaturedItem }) {
   const Icon = featured.icon;
   return (
@@ -346,7 +337,6 @@ function FeaturedCard({ featured }: { featured: FeaturedItem }) {
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full bg-white blur-3xl group-hover:scale-150 transition-transform duration-700" />
       </div>
-
       <div className="relative z-10">
         <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center mb-4 group-hover:bg-white/30 transition-colors duration-300">
           <Icon className="w-5 h-5 text-white" />
@@ -356,7 +346,6 @@ function FeaturedCard({ featured }: { featured: FeaturedItem }) {
           {featured.description}
         </p>
       </div>
-
       <div className="relative z-10 mt-4 flex items-center gap-1.5 text-xs font-semibold text-white/80 group-hover:text-white transition-colors">
         <span>Explorer</span>
         <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform duration-300" />
@@ -365,7 +354,6 @@ function FeaturedCard({ featured }: { featured: FeaturedItem }) {
   );
 }
 
-/** Dropdown standard (non-mega) */
 function StandardDropdown({ items }: { items: SubItem[] }) {
   return (
     <motion.div
@@ -387,7 +375,6 @@ function StandardDropdown({ items }: { items: SubItem[] }) {
   );
 }
 
-/** Mega menu complet */
 function MegaMenuDropdown({
   submenu,
   featured,
@@ -437,10 +424,10 @@ function MegaMenuDropdown({
       {/* Footer */}
       <div className="border-t border-white/5 px-4 py-2.5 flex items-center justify-between bg-white/2">
         <span className="text-xs text-white/30">
-          Toutes nos solutions technologiques
+          Toutes les destinations de Nosy Be
         </span>
         <a
-          href="/solutions"
+          href="/destinations"
           className="text-xs font-medium text-violet-400 hover:text-violet-300 transition-colors flex items-center gap-1 group"
         >
           Voir tout
@@ -608,7 +595,7 @@ export function NavbarMenu() {
               >
                 <span className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                 <Sparkles className="w-3 h-3 mr-1.5 relative z-10" />
-                <span className="relative z-10">Essai gratuit</span>
+                <span className="relative z-10">Réserver</span>
               </Button>
             </motion.div>
           </div>
@@ -690,7 +677,6 @@ export function NavbarMenu() {
                             <ChevronDown className="w-4 h-4" />
                           </motion.div>
                         </button>
-
                         <AnimatePresence>
                           {mobileExpanded === link.label && (
                             <motion.div
@@ -774,9 +760,7 @@ export function NavbarMenu() {
                   <Button className="w-full relative overflow-hidden bg-linear-to-r from-violet-600 to-indigo-600 text-white rounded-xl h-11 text-sm font-bold shadow-lg shadow-violet-500/25 group border-0">
                     <span className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                     <Sparkles className="w-4 h-4 mr-2 relative z-10" />
-                    <span className="relative z-10">
-                      Commencer gratuitement
-                    </span>
+                    <span className="relative z-10">Réserver maintenant</span>
                   </Button>
                 </motion.div>
               </div>

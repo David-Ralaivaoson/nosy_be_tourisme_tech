@@ -1,4 +1,3 @@
-// src/components/3d/LaptopScene.tsx
 import { useRef, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import * as THREE from "three";
@@ -90,7 +89,6 @@ const SCREEN_MESH = "Object_123";
 
 const LID_OPEN_ANGLE = 0.0;
 const LID_CLOSE_ANGLE = Math.PI / 1.62;
-
 const DRAG_SENSITIVITY = 0.003;
 const DRAG_MAX = THREE.MathUtils.degToRad(20);
 
@@ -147,12 +145,11 @@ const RESPONSIVE_3D = {
   },
   mobile: {
     initFromY: -1.0,
-    initRestY: -1.0, // MacBook repose bas de l'écran
+    initRestY: -1.0,
     initFromRotY: THREE.MathUtils.degToRad(4),
-    openRestY: -1.5, // reste en bas après ouverture
+    openRestY: -1.5,
     scaleOpen: 0.09,
     scaleClose: 0.08,
-    // ✅ Pas de translation X — rotation sur place uniquement
     scene2: { x: 0, y: -1.5, z: 0 },
     scene2rot: {
       y: THREE.MathUtils.degToRad(25),
@@ -168,9 +165,6 @@ const RESPONSIVE_3D = {
   },
 } as const;
 
-// ─────────────────────────────────────────────────────────────────────────────
-// LaptopScene
-// ─────────────────────────────────────────────────────────────────────────────
 export function LaptopScene() {
   const macbookRef = useRef<THREE.Group>(null);
   const dragWrapperRef = useRef<THREE.Group>(null);
@@ -196,12 +190,14 @@ export function LaptopScene() {
     "/models/macbook-m5-pro.glb",
   ) as unknown as GLTFResult;
 
+  // Images touristiques de Nosy Be pour l'écran
   const [tex1, tex2, tex3, tex4] = useTexture([
-    "/textures/screen-1.jpg",
-    "/textures/screen-2.png",
-    "/textures/screen-3.jpg",
-    "/textures/screen-4.jpg",
+    "/textures/nosybe-hero.png",
+    "/textures/nosybe-plages.jpg",
+    "/textures/nosybe-activites.jpg",
+    "/textures/nosybe-coucher.jpg",
   ]);
+
   const texturesRef = useRef<THREE.Texture[]>([]);
 
   // ─── Setup matériau & hinge ────────────────────────────────────────────────
@@ -243,7 +239,6 @@ export function LaptopScene() {
 
   // ─── Drag events ──────────────────────────────────────────────────────────
   useEffect(() => {
-    // Direction dominante du geste touch courant
     const touchDir = { dominant: null as "horizontal" | "vertical" | null };
 
     const onMouseDown = (e: MouseEvent) => {
@@ -269,7 +264,7 @@ export function LaptopScene() {
       if (!isDragging.current) return;
       const dx = e.clientX - dragStart.current.mouseX;
       const dy = e.clientY - dragStart.current.mouseY;
-      // Desktop : X et Y libres
+
       dragOffset.current.y = THREE.MathUtils.clamp(
         dragStart.current.rotY + dx * DRAG_SENSITIVITY,
         -DRAG_MAX,
@@ -322,7 +317,6 @@ export function LaptopScene() {
       const dx = t.clientX - dragStart.current.mouseX;
       const dy = t.clientY - dragStart.current.mouseY;
 
-      // Détermine la direction dominante au premier mouvement significatif
       if (
         touchDir.dominant === null &&
         (Math.abs(dx) > 4 || Math.abs(dy) > 4)
@@ -332,23 +326,15 @@ export function LaptopScene() {
       }
 
       const currentBp = getBreakpoint(window.innerWidth);
-
       if (currentBp === "mobile" || currentBp === "tablet") {
-        // ✅ Mobile & Tablette :
-        // - Geste vertical → scroll natif, on ne touche à rien
-        // - Geste horizontal → rotation Y uniquement (gauche/droite sur place)
         if (touchDir.dominant === "vertical") return;
-
-        // Rotation Y gauche/droite via glissement horizontal
         dragOffset.current.y = THREE.MathUtils.clamp(
           dragStart.current.rotY + dx * DRAG_SENSITIVITY * 0.8,
           -DRAG_MAX,
           DRAG_MAX,
         );
-        // ✅ X bloqué à 0 — pas de tilt haut/bas
         dragOffset.current.x = 0;
       } else {
-        // Desktop : comportement original X + Y
         if (touchDir.dominant === "vertical") return;
         dragOffset.current.y = THREE.MathUtils.clamp(
           dragStart.current.rotY + dx * DRAG_SENSITIVITY,
@@ -407,14 +393,18 @@ export function LaptopScene() {
   const setTexture = (index: number) => {
     if (currentTexRef.current === index) return;
     if (!screenMeshRef.current) return;
+
     const mat = screenMeshRef.current.material as THREE.MeshStandardMaterial;
     const nextTex = texturesRef.current[index];
     if (!nextTex) return;
+
     if (texTransitionRef.current) {
       texTransitionRef.current.kill();
       texTransitionRef.current = null;
     }
+
     currentTexRef.current = index;
+
     texTransitionRef.current = gsap.to(mat, {
       emissiveIntensity: 0,
       duration: TEX_FADE_DURATION / 2,
@@ -463,12 +453,14 @@ export function LaptopScene() {
         0,
       );
     }
+
     tlIntro.fromTo(
       macbookRef.current.position,
       { y: cfg.initFromY },
       { y: cfg.initRestY, duration: 1.0, ease: "power3.out" },
       0,
     );
+
     tlIntro.fromTo(
       macbookRef.current.rotation,
       { y: cfg.initFromRotY },
@@ -620,7 +612,6 @@ export function LaptopScene() {
       0,
     );
 
-    // ✅ Mobile/Tablette : transition verticale (y) au lieu de horizontale (x)
     tlText.fromTo(
       ".scene-2-text",
       { opacity: 0, x: isTouch ? 0 : 60, y: isTouch ? 20 : 0 },
@@ -638,6 +629,7 @@ export function LaptopScene() {
       },
       1.0,
     );
+
     tlText.fromTo(
       ".scene-3-text",
       { opacity: 0, x: isTouch ? 0 : -60, y: isTouch ? 20 : 0 },
@@ -655,6 +647,7 @@ export function LaptopScene() {
       },
       1.6,
     );
+
     tlText.fromTo(
       ".scene-4-text",
       { opacity: 0, y: 40 },
@@ -666,11 +659,13 @@ export function LaptopScene() {
       { opacity: 0, y: -20, duration: 0.4, ease: "power2.in" },
       2.4,
     );
+
     tlText.to(
       ".scene-5-overlay",
       { opacity: 1, duration: 0.8, ease: "power2.in" },
       2.7,
     );
+
     tlText.fromTo(
       ".scene-5-discover",
       { opacity: 0, y: -40, filter: "blur(6px)" },
@@ -688,11 +683,13 @@ export function LaptopScene() {
   // ─── closeLid / openLid ────────────────────────────────────────────────────
   const closeLid = () => {
     if (!lidPivotRef.current || !screenMeshRef.current) return;
+
     gsap.to(lidPivotRef.current.rotation, {
       x: LID_CLOSE_ANGLE,
       duration: 1.4,
       ease: "power3.inOut",
     });
+
     const mat = screenMeshRef.current.material as THREE.MeshStandardMaterial;
     gsap.to(mat, {
       emissiveIntensity: 0,
@@ -707,11 +704,13 @@ export function LaptopScene() {
 
   const openLid = () => {
     if (!lidPivotRef.current || !screenMeshRef.current) return;
+
     gsap.to(lidPivotRef.current.rotation, {
       x: LID_OPEN_ANGLE,
       duration: 1.2,
       ease: "power3.inOut",
     });
+
     const mat = screenMeshRef.current.material as THREE.MeshStandardMaterial;
     gsap.to(mat, {
       emissiveIntensity: 0.6,
@@ -743,6 +742,7 @@ export function LaptopScene() {
               />
             ) : null,
           )}
+
           <group ref={lidPivotRef} rotation={[LID_CLOSE_ANGLE, 0, 0]}>
             <group ref={lidMeshesRef}>
               {LID_MESHES.map((name) =>
