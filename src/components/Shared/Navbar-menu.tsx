@@ -10,7 +10,6 @@ import {
   Shield,
   Cloud,
   Code2,
-  BarChart3,
   Users,
   Headphones,
   BookOpen,
@@ -19,20 +18,21 @@ import {
   ArrowRight,
   Sparkles,
   Globe,
-  Lock,
-  Cpu,
   Database,
   GitBranch,
+  ClipboardList,
+  Compass,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import { Button } from "@/src/components/ui/button";
+import { Separator } from "@/src/components/ui/separator";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
+} from "@/src/components/ui/tooltip";
+import { cn } from "@/src/lib/utils";
+import { useQuoteStore, selectQuoteCount } from "@/src/store/quote-store";
 
 // ============================================================
 // TYPES
@@ -43,7 +43,6 @@ interface SubItem {
   description: string;
   icon: any;
   badge?: string;
-  badgeVariant?: "default" | "secondary" | "destructive" | "outline";
 }
 
 interface FeaturedItem {
@@ -63,87 +62,58 @@ interface NavLink {
 }
 
 // ============================================================
-// DATA — Adapté pour le tourisme à Nosy Be
+// DATA — inchangée
 // ============================================================
 const navLinks: NavLink[] = [
   {
     label: "Destinations",
     megamenu: true,
     featured: {
-      label: "Découvrir Nosy Be",
-      description: "Explorez l'île aux parfums et ses trésors cachés",
-      href: "/destinations",
+      label: "Découvrir Sainte-Marie",
+      description: "L'île aux baleines et ses trésors cachés",
+      href: "/",
       icon: Sparkles,
       gradient: "from-violet-600 to-indigo-600",
     },
     submenu: [
       {
-        label: "Nosy Komba",
-        href: "/destinations/nosy-komba",
-        description: "Île volcanique avec lémuriens et plages paradisiaques",
+        label: "Safari Baleines",
+        href: "/excursions/safari-baleines",
+        description: "Observation des baleines à bosse (juil-sept)",
+        icon: Shield,
+        badge: "Saison",
+      },
+      {
+        label: "Baie d'Ampanihy",
+        href: "/excursions/baie-ampanihy",
+        description: "Eaux turquoises et villages de pêcheurs",
         icon: Cloud,
         badge: "Populaire",
       },
       {
-        label: "Nosy Tanikely",
-        href: "/destinations/nosy-tanikely",
-        description: "Réserve marine protégée pour la plongée",
-        icon: Shield,
+        label: "Île aux Nattes",
+        href: "/excursions/ile-aux-nattes",
+        description: "Paradis préservé sans route ni voiture",
+        icon: Sparkles,
         badge: "Incontournable",
       },
       {
-        label: "Lokobe",
-        href: "/destinations/lokobe",
-        description: "Réserve naturelle avec faune endémique",
-        icon: Cpu,
-        badge: "Nature",
-      },
-      {
-        label: "Amparihy",
-        href: "/destinations/amparihy",
-        description: "Plage de sable blanc et eaux cristallines",
-        icon: BarChart3,
-      },
-      {
-        label: "Hell Ville",
-        href: "/destinations/hell-ville",
-        description: "Capitale de Nosy Be avec marché local",
-        icon: GitBranch,
-      },
-      {
-        label: "Plantations Ylang",
-        href: "/destinations/ylang",
-        description: "Découverte de l'île aux parfums",
-        icon: Database,
-      },
-    ],
-  },
-  {
-    label: "Activités",
-    submenu: [
-      {
-        label: "Plongée",
-        href: "/activites/plongee",
-        description: "Explorez les fonds marins exceptionnels",
-        icon: Code2,
-      },
-      {
-        label: "Snorkeling",
-        href: "/activites/snorkeling",
-        description: "Observation des tortues et poissons tropicaux",
+        label: "Piscines Naturelles",
+        href: "/excursions/piscines-naturelles",
+        description: "Bassins coralliens et poissons tropicaux",
         icon: Globe,
       },
       {
-        label: "Excursions",
-        href: "/activites/excursions",
-        description: "Circuits personnalisés en pirogue",
-        icon: Lock,
+        label: "Maison Blanche",
+        href: "/excursions/maison-blanche",
+        description: "Histoire des pirates et flibustiers",
+        icon: Database,
       },
       {
-        label: "Randonnée",
-        href: "/activites/randonnee",
-        description: "Découverte de la nature et villages",
-        icon: Zap,
+        label: "Plongée Sous-Marine",
+        href: "/excursions/plongee-sous-marine",
+        description: "Récifs coralliens et épaves",
+        icon: Code2,
         badge: "Nouveau",
       },
     ],
@@ -152,61 +122,66 @@ const navLinks: NavLink[] = [
     label: "Hébergements",
     submenu: [
       {
-        label: "Lodges",
-        href: "/hebergements/lodges",
-        description: "Hébergements de charme en bord de mer",
-        icon: FileText,
-      },
-      {
-        label: "Hôtels",
-        href: "/hebergements/hotels",
-        description: "Confort et services premium",
+        label: "Tous les hébergements",
+        href: "/hebergements",
+        description: "Voir tous les hôtels, lodges et villas",
         icon: BookOpen,
       },
       {
+        label: "Lodges de luxe",
+        href: "/hebergements?category=LUXE",
+        description: "Pieds dans l'eau avec piscine",
+        icon: FileText,
+      },
+      {
         label: "Bungalows",
-        href: "/hebergements/bungalows",
+        href: "/hebergements?category=BUNGALOW",
         description: "Authenticité et immersion locale",
         icon: PlayCircle,
       },
       {
-        label: "Réservations",
-        href: "/hebergements/reservations",
-        description: "Réservez en ligne avec confirmation immédiate",
-        icon: Headphones,
+        label: "Écolodges",
+        href: "/hebergements?category=ECOLODGE",
+        description: "Tourisme durable et nature",
+        icon: Zap,
       },
     ],
   },
   {
-    label: "Infos Pratiques",
+    label: "Transports",
     submenu: [
       {
-        label: "Comment venir",
-        href: "/infos/venir",
-        description: "Vols, bateaux et transports vers Nosy Be",
+        label: "Tous les transports",
+        href: "/transports",
+        description: "Transferts et locations de véhicules",
         icon: Users,
       },
       {
-        label: "Climat",
-        href: "/infos/climat",
-        description: "Meilleures périodes pour visiter",
-        icon: Sparkles,
-        badge: "Conseils",
+        label: "Transferts privés",
+        href: "/transports?type=TRANSFER",
+        description: "Aéroport et port vers votre hôtel",
+        icon: Headphones,
+      },
+      {
+        label: "Location véhicules",
+        href: "/transports?type=VEHICLE_RENTAL",
+        description: "4x4, quads, scooters avec ou sans chauffeur",
+        icon: GitBranch,
       },
     ],
   },
+  { label: "Services +", href: "/services" },
   { label: "Contact", href: "/contact" },
 ];
 
 // ============================================================
-// BADGE VARIANT MAP
+// BADGE VARIANT MAP — teintes claires
 // ============================================================
 const badgeStyles: Record<string, string> = {
-  Populaire: "bg-violet-500/20 text-violet-300 border-violet-500/30",
-  Incontournable: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
-  Nature: "bg-amber-500/20 text-amber-300 border-amber-500/30",
-  Conseils: "bg-rose-500/20 text-rose-300 border-rose-500/30",
-  Nouveau: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
+  Populaire: "bg-violet-100 text-violet-700 border-violet-200",
+  Incontournable: "bg-emerald-100 text-emerald-700 border-emerald-200",
+  Saison: "bg-amber-100 text-amber-700 border-amber-200",
+  Nouveau: "bg-emerald-100 text-emerald-700 border-emerald-200",
 };
 
 // ============================================================
@@ -215,12 +190,7 @@ const badgeStyles: Record<string, string> = {
 const EASE_SPRING = [0.16, 1, 0.3, 1] as [number, number, number, number];
 
 const megaMenuVariants: Variants = {
-  hidden: {
-    opacity: 0,
-    y: -8,
-    scale: 0.98,
-    filter: "blur(4px)",
-  },
+  hidden: { opacity: 0, y: -8, scale: 0.98, filter: "blur(4px)" },
   visible: {
     opacity: 1,
     y: 0,
@@ -244,11 +214,7 @@ const megaMenuVariants: Variants = {
 
 const itemVariants: Variants = {
   hidden: { opacity: 0, y: 6 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.2 },
-  },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.2 } },
 };
 
 const mobileMenuVariants: Variants = {
@@ -270,13 +236,32 @@ const mobileItemVariants = {
   visible: (i: number) => ({
     opacity: 1,
     x: 0,
-    transition: {
-      delay: i * 0.06,
-      duration: 0.3,
-      ease: EASE_SPRING,
-    },
+    transition: { delay: i * 0.06, duration: 0.3, ease: EASE_SPRING },
   }),
 };
+
+// ============================================================
+// LOGO — monogramme dégradé + libellé sur 3 lignes
+// ============================================================
+function BrandLogo() {
+  return (
+    <a href="/" className="flex items-center gap-2.5 shrink-0" data-no-drag>
+      <div className="relative w-9 h-9 rounded-xl bg-linear-to-br from-violet-600 via-violet-500 to-indigo-500 shadow-lg shadow-violet-500/30 flex items-center justify-center">
+        <span className="text-white font-black text-xs tracking-tighter">
+          MB
+        </span>
+      </div>
+      <div className="hidden sm:flex flex-col leading-[1.05]">
+        <span className="text-[10px] font-black uppercase tracking-[0.14em] text-[#17123a]">
+          Sainte Marie
+        </span>
+        <span className="text-[10px] font-black uppercase tracking-[0.14em] text-violet-600">
+          Guide
+        </span>
+      </div>
+    </a>
+  );
+}
 
 // ============================================================
 // SUB-COMPONENTS
@@ -288,33 +273,33 @@ function MegaMenuItem({ item }: { item: SubItem }) {
       href={item.href}
       variants={itemVariants}
       whileHover={{ x: 3 }}
-      className="group flex items-start gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors duration-200 cursor-pointer"
+      className="group flex items-start gap-3 p-3 rounded-xl hover:bg-violet-50 transition-colors duration-200 cursor-pointer"
     >
-      <div className="shrink-0 w-9 h-9 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center group-hover:bg-violet-500/20 group-hover:border-violet-500/40 transition-all duration-300">
-        <Icon className="w-4 h-4 text-violet-400 group-hover:text-violet-300 transition-colors" />
+      <div className="shrink-0 w-9 h-9 rounded-lg bg-violet-50 border border-violet-100 flex items-center justify-center group-hover:bg-violet-100 group-hover:border-violet-200 transition-all duration-300">
+        <Icon className="w-4 h-4 text-violet-600 group-hover:text-violet-700 transition-colors" />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-0.5">
-          <span className="text-sm font-medium text-white/80 group-hover:text-white transition-colors">
+          <span className="text-sm font-medium text-[#17123a]/85 group-hover:text-[#17123a] transition-colors">
             {item.label}
           </span>
           {item.badge && (
             <span
               className={cn(
                 "text-[10px] font-semibold px-1.5 py-0.5 rounded-full border",
-                badgeStyles[item.badge as keyof typeof badgeStyles] ??
-                  "bg-violet-500/20 text-violet-300 border-violet-500/30",
+                badgeStyles[item.badge] ??
+                  "bg-violet-100 text-violet-700 border-violet-200",
               )}
             >
               {item.badge}
             </span>
           )}
         </div>
-        <p className="text-xs text-white/40 group-hover:text-white/60 transition-colors leading-relaxed line-clamp-2">
+        <p className="text-xs text-[#17123a]/45 group-hover:text-[#17123a]/60 transition-colors leading-relaxed line-clamp-2">
           {item.description}
         </p>
       </div>
-      <ArrowRight className="w-3.5 h-3.5 text-white/20 group-hover:text-violet-400 group-hover:translate-x-1 transition-all duration-300 mt-1 shrink-0" />
+      <ArrowRight className="w-3.5 h-3.5 text-violet-300 group-hover:text-violet-500 group-hover:translate-x-1 transition-all duration-300 mt-1 shrink-0" />
     </motion.a>
   );
 }
@@ -333,7 +318,6 @@ function FeaturedCard({ featured }: { featured: FeaturedItem }) {
         featured.gradient,
       )}
     >
-      {/* Animated background orb */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full bg-white blur-3xl group-hover:scale-150 transition-transform duration-700" />
       </div>
@@ -361,11 +345,9 @@ function StandardDropdown({ items }: { items: SubItem[] }) {
       initial="hidden"
       animate="visible"
       exit="exit"
-      className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-72 bg-slate-900/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl shadow-black/40 overflow-hidden"
-      style={{ zIndex: 9999 }}
+      className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-72 bg-white/98 backdrop-blur-2xl border border-slate-200 rounded-2xl shadow-2xl shadow-violet-950/10 overflow-hidden z-[9998]"
     >
-      {/* Top glow */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-violet-500/50 to-transparent" />
+      <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-violet-300 to-transparent" />
       <div className="p-2">
         {items.map((item) => (
           <MegaMenuItem key={item.href} item={item} />
@@ -392,21 +374,18 @@ function MegaMenuDropdown({
       initial="hidden"
       animate="visible"
       exit="exit"
-      className="absolute top-full left-1/2 -translate-x-1/2 mt-3 bg-slate-900/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl shadow-black/40 overflow-hidden"
+      className="absolute top-full left-1/2 -translate-x-1/2 mt-3 bg-white/98 backdrop-blur-2xl border border-slate-200 rounded-2xl shadow-2xl shadow-violet-950/10 overflow-hidden z-[9998]"
       style={{ width: "720px", zIndex: 9999 }}
     >
-      {/* Top glow */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-violet-500/50 to-transparent" />
+      <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-violet-300 to-transparent" />
 
       <div className="flex">
-        {/* Featured card */}
         {featured && (
-          <div className="w-56 shrink-0 p-3 border-r border-white/5">
+          <div className="w-56 shrink-0 p-3 border-r border-slate-100">
             <FeaturedCard featured={featured} />
           </div>
         )}
 
-        {/* Grid d'items */}
         <div className="flex-1 p-3 grid grid-cols-2 gap-0">
           <div>
             {col1.map((item) => (
@@ -421,14 +400,13 @@ function MegaMenuDropdown({
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="border-t border-white/5 px-4 py-2.5 flex items-center justify-between bg-white/2">
-        <span className="text-xs text-white/30">
-          Toutes les destinations de Nosy Be
+      <div className="border-t border-slate-100 px-4 py-2.5 flex items-center justify-between bg-slate-50/60">
+        <span className="text-xs text-[#17123a]/40">
+          Toutes les destinations de Sainte Marie
         </span>
         <a
-          href="/destinations"
-          className="text-xs font-medium text-violet-400 hover:text-violet-300 transition-colors flex items-center gap-1 group"
+          href="/excursions"
+          className="text-xs font-medium text-violet-600 hover:text-violet-700 transition-colors flex items-center gap-1 group"
         >
           Voir tout
           <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
@@ -446,6 +424,7 @@ export function NavbarMenu() {
   const [openMobile, setOpenMobile] = useState(false);
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
+  const count = useQuoteStore(selectQuoteCount);
   const navRef = useRef<HTMLElement>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -487,287 +466,307 @@ export function NavbarMenu() {
   }, []);
 
   return (
-    <div className="fixed top-0 right-0 z-9999 flex justify-center px-4 py-2">
-      <motion.nav
-        ref={navRef}
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5, ease: EASE_SPRING }}
-        className={cn(
-          "w-full max-w-6xl rounded-2xl transition-all duration-500",
-          scrolled
-            ? "bg-slate-950/90 backdrop-blur-2xl border border-white/10 shadow-2xl shadow-black/50"
-            : "bg-slate-950/70 backdrop-blur-xl border border-white/5 shadow-lg shadow-black/20",
-        )}
-      >
-        <div className="flex items-center justify-between gap-12 lg:px-5 lg:h-16">
-          {/* ── DESKTOP NAV ── */}
-          <div className="hidden lg:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <div
-                key={link.label}
-                className="relative"
-                onMouseEnter={() =>
-                  link.submenu && handleMouseEnter(link.label)
-                }
-                onMouseLeave={() => link.submenu && handleMouseLeave()}
-              >
-                {link.submenu ? (
-                  <>
-                    <button
-                      onClick={() =>
-                        setActiveMenu(
-                          activeMenu === link.label ? null : link.label,
-                        )
-                      }
-                      className={cn(
-                        "flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold uppercase tracking-widest transition-all duration-200",
-                        activeMenu === link.label
-                          ? "text-white bg-white/10"
-                          : "text-white/60 hover:text-white hover:bg-white/5",
-                      )}
-                      aria-expanded={activeMenu === link.label}
-                    >
-                      {link.label}
-                      <motion.div
-                        animate={{
-                          rotate: activeMenu === link.label ? 180 : 0,
-                        }}
-                        transition={{ duration: 0.25 }}
-                      >
-                        <ChevronDown className="w-3 h-3" />
-                      </motion.div>
-                    </button>
+    <TooltipProvider delay={300}>
+      <div className="fixed top-0 inset-x-0 z-[999] flex justify-center px-4 py-3">
+        <motion.nav
+          ref={navRef}
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.5, ease: EASE_SPRING }}
+          className={cn(
+            "w-full max-w-6xl rounded-2xl transition-all duration-500",
+            scrolled
+              ? "bg-white/95 backdrop-blur-2xl border border-slate-200 shadow-xl shadow-violet-950/10"
+              : "bg-white/80 backdrop-blur-xl border border-white/60 shadow-lg shadow-violet-950/5",
+          )}
+        >
+          <div className="flex items-center justify-between gap-6 px-4 lg:px-5 h-16">
+            {/* ── LOGO ── */}
+            <BrandLogo />
 
-                    <AnimatePresence>
-                      {activeMenu === link.label && (
-                        <>
-                          {link.megamenu ? (
-                            <MegaMenuDropdown
-                              submenu={link.submenu}
-                              featured={link.featured}
-                            />
-                          ) : (
-                            <StandardDropdown items={link.submenu} />
-                          )}
-                        </>
-                      )}
-                    </AnimatePresence>
-                  </>
-                ) : (
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <motion.a
-                        href={link.href}
-                        whileHover={{ scale: 1.03 }}
-                        whileTap={{ scale: 0.97 }}
-                        className="relative flex items-center px-3.5 py-2 rounded-xl text-xs font-semibold uppercase tracking-widest text-white/60 hover:text-white hover:bg-white/5 transition-all duration-200 group"
+            {/* ── DESKTOP NAV ── */}
+            <div className="hidden lg:flex items-center gap-1">
+              {navLinks.map((link) => (
+                <div
+                  key={link.label}
+                  className="relative"
+                  onMouseEnter={() =>
+                    link.submenu && handleMouseEnter(link.label)
+                  }
+                  onMouseLeave={() => link.submenu && handleMouseLeave()}
+                >
+                  {link.submenu ? (
+                    <>
+                      <button
+                        onClick={() =>
+                          setActiveMenu(
+                            activeMenu === link.label ? null : link.label,
+                          )
+                        }
+                        className={cn(
+                          "flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold uppercase tracking-widest transition-all duration-200",
+                          activeMenu === link.label
+                            ? "text-violet-700 bg-violet-50"
+                            : "text-[#17123a]/60 hover:text-[#17123a] hover:bg-slate-50",
+                        )}
+                        aria-expanded={activeMenu === link.label}
                       >
                         {link.label}
-                        <span className="absolute bottom-1.5 left-3.5 right-3.5 h-px bg-linear-to-r from-violet-400 to-indigo-400 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-                      </motion.a>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      side="bottom"
-                      className="bg-slate-900 border z-[99999] border-violet-500/20 text-white text-xs rounded-lg"
-                    >
-                      Accéder à {link.label}
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-              </div>
-            ))}
-          </div>
+                        <motion.div
+                          animate={{
+                            rotate: activeMenu === link.label ? 180 : 0,
+                          }}
+                          transition={{ duration: 0.25 }}
+                        >
+                          <ChevronDown className="w-3 h-3" />
+                        </motion.div>
+                      </button>
 
-          {/* ── ACTIONS DESKTOP ── */}
-          <div className="hidden lg:flex items-center gap-2">
-            <Button
+                      <AnimatePresence>
+                        {activeMenu === link.label && (
+                          <>
+                            {link.megamenu ? (
+                              <MegaMenuDropdown
+                                submenu={link.submenu}
+                                featured={link.featured}
+                              />
+                            ) : (
+                              <StandardDropdown items={link.submenu} />
+                            )}
+                          </>
+                        )}
+                      </AnimatePresence>
+                    </>
+                  ) : (
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <motion.a
+                          href={link.href}
+                          whileHover={{ scale: 1.03 }}
+                          whileTap={{ scale: 0.97 }}
+                          className="relative flex items-center px-3.5 py-2 rounded-xl text-xs font-semibold uppercase tracking-widest text-[#17123a]/60 hover:text-[#17123a] hover:bg-slate-50 transition-all duration-200 group"
+                        >
+                          {link.label}
+                          <span className="absolute bottom-1.5 left-3.5 right-3.5 h-px bg-linear-to-r from-violet-500 to-indigo-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                        </motion.a>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        side="bottom"
+                        sideOffset={10}
+                        className="bg-white border border-slate-200 text-[#17123a] text-xs rounded-lg shadow-lg shadow-violet-950/10 z-[99999]"
+                      >
+                        Accéder à {link.label}
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* ── ACTIONS DESKTOP ── */}
+            <div className="hidden lg:flex items-center gap-2">
+              {/* <Button
               variant="ghost"
               size="sm"
-              className="text-white/60 hover:text-white hover:bg-white/5 text-xs font-semibold uppercase tracking-widest rounded-xl h-9"
+              className="text-[#17123a]/60 hover:text-[#17123a] hover:bg-slate-50 text-xs font-semibold uppercase tracking-widest rounded-xl h-9"
             >
               Connexion
-            </Button>
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-              <Button
-                size="sm"
-                className="relative overflow-hidden bg-linear-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-xs font-bold uppercase tracking-widest rounded-xl h-9 px-5 border-0 shadow-lg shadow-violet-500/25 group"
+            </Button> */}
+
+              <motion.a
+                href="/devis"
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                className="relative flex items-center gap-2 bg-linear-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-xs font-bold uppercase tracking-widest rounded-xl h-9 px-4 border-0 shadow-lg shadow-violet-500/30 group overflow-hidden"
               >
-                <span className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-                <Sparkles className="w-3 h-3 mr-1.5 relative z-10" />
-                <span className="relative z-10">Réserver</span>
-              </Button>
-            </motion.div>
-          </div>
-
-          {/* ── MOBILE TOGGLE ── */}
-          <div className="lg:hidden flex items-center justify-center h-full">
-            <motion.button
-              whileTap={{ scale: 0.5 }}
-              onClick={() => setOpenMobile(!openMobile)}
-              className="lg:hidden relative p-3 ml-auto rounded-xl hover:bg-white/5 transition-colors duration-200"
-              aria-label="Toggle navigation"
-            >
-              <AnimatePresence mode="wait">
-                {openMobile ? (
-                  <motion.div
-                    key="close"
-                    initial={{ rotate: -90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: 90, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <X className="w-5 h-5 text-white" />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="open"
-                    initial={{ rotate: 90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: -90, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Menu className="w-5 h-5 text-white" />
-                  </motion.div>
+                <span className="absolute inset-0 bg-linear-to-r from-transparent via-white/15 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                <ClipboardList className="w-3 h-3 relative z-10" />
+                <span className="relative z-10">Mon devis</span>
+                {count > 0 && (
+                  <span className="relative z-10 flex size-5 items-center justify-center rounded-full bg-amber-400 text-[10px] font-black text-black">
+                    {count}
+                  </span>
                 )}
-              </AnimatePresence>
-            </motion.button>
-          </div>
-        </div>
+              </motion.a>
+            </div>
 
-        {/* ── MOBILE MENU ── */}
-        <AnimatePresence>
-          {openMobile && (
-            <motion.div
-              variants={mobileMenuVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className="lg:hidden overflow-hidden"
-            >
-              <Separator className="bg-white/5" />
-              <div className="p-3 space-y-1 max-h-[75vh] overflow-y-auto">
-                {navLinks.map((link, idx) => (
+            {/* ── MOBILE TOGGLE ── */}
+            <div className="lg:hidden flex items-center justify-center h-full">
+              <motion.button
+                whileTap={{ scale: 0.5 }}
+                onClick={() => setOpenMobile(!openMobile)}
+                className="lg:hidden relative p-2.5 ml-auto rounded-xl hover:bg-slate-50 transition-colors duration-200"
+                aria-label="Toggle navigation"
+              >
+                <AnimatePresence mode="wait">
+                  {openMobile ? (
+                    <motion.div
+                      key="close"
+                      initial={{ rotate: -90, opacity: 0 }}
+                      animate={{ rotate: 0, opacity: 1 }}
+                      exit={{ rotate: 90, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <X className="w-5 h-5 text-[#17123a]" />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="open"
+                      initial={{ rotate: 90, opacity: 0 }}
+                      animate={{ rotate: 0, opacity: 1 }}
+                      exit={{ rotate: -90, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <Menu className="w-5 h-5 text-[#17123a]" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.button>
+            </div>
+          </div>
+
+          {/* ── MOBILE MENU ── */}
+          <AnimatePresence>
+            {openMobile && (
+              <motion.div
+                variants={mobileMenuVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="lg:hidden overflow-hidden"
+              >
+                <Separator className="bg-slate-100" />
+                <div className="p-3 space-y-1 max-h-[75vh] overflow-y-auto">
+                  {navLinks.map((link, idx) => (
+                    <motion.div
+                      key={link.label}
+                      custom={idx}
+                      variants={mobileItemVariants}
+                      initial="hidden"
+                      animate="visible"
+                    >
+                      {link.submenu ? (
+                        <div>
+                          <button
+                            onClick={() =>
+                              setMobileExpanded(
+                                mobileExpanded === link.label
+                                  ? null
+                                  : link.label,
+                              )
+                            }
+                            className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold uppercase tracking-widest text-[#17123a]/60 hover:text-[#17123a] hover:bg-slate-50 transition-all duration-200 group"
+                          >
+                            <span className="group-hover:text-[#17123a] transition-colors">
+                              {link.label}
+                            </span>
+                            <motion.div
+                              animate={{
+                                rotate: mobileExpanded === link.label ? 180 : 0,
+                              }}
+                              transition={{ duration: 0.25 }}
+                            >
+                              <ChevronDown className="w-4 h-4" />
+                            </motion.div>
+                          </button>
+                          <AnimatePresence>
+                            {mobileExpanded === link.label && (
+                              <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                exit={{ opacity: 0, height: 0 }}
+                                transition={{ duration: 0.25 }}
+                                className="overflow-hidden ml-3 mt-1 pl-3 border-l border-violet-200"
+                              >
+                                {link.submenu.map((item, subIdx) => {
+                                  const Icon = item.icon;
+                                  return (
+                                    <motion.a
+                                      key={item.href}
+                                      href={item.href}
+                                      initial={{ opacity: 0, x: -8 }}
+                                      animate={{ opacity: 1, x: 0 }}
+                                      transition={{ delay: subIdx * 0.05 }}
+                                      onClick={() => setOpenMobile(false)}
+                                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-violet-50 group transition-colors duration-200"
+                                    >
+                                      <div className="w-7 h-7 rounded-lg bg-violet-50 border border-violet-100 flex items-center justify-center group-hover:bg-violet-100 transition-colors shrink-0">
+                                        <Icon className="w-3.5 h-3.5 text-violet-600" />
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-sm text-[#17123a]/75 group-hover:text-[#17123a] transition-colors font-medium">
+                                            {item.label}
+                                          </span>
+                                          {item.badge && (
+                                            <span
+                                              className={cn(
+                                                "text-[9px] font-bold px-1.5 py-0.5 rounded-full border",
+                                                badgeStyles[item.badge] ??
+                                                  "bg-violet-100 text-violet-700 border-violet-200",
+                                              )}
+                                            >
+                                              {item.badge}
+                                            </span>
+                                          )}
+                                        </div>
+                                        <p className="text-[11px] text-[#17123a]/40 mt-0.5 line-clamp-1">
+                                          {item.description}
+                                        </p>
+                                      </div>
+                                    </motion.a>
+                                  );
+                                })}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      ) : (
+                        <motion.a
+                          href={link.href}
+                          onClick={() => setOpenMobile(false)}
+                          whileHover={{ x: 4 }}
+                          className="block px-4 py-3 rounded-xl text-sm font-semibold uppercase tracking-widest text-[#17123a]/60 hover:text-[#17123a] hover:bg-slate-50 transition-all duration-200"
+                        >
+                          {link.label}
+                        </motion.a>
+                      )}
+                    </motion.div>
+                  ))}
+
                   <motion.div
-                    key={link.label}
-                    custom={idx}
+                    custom={navLinks.length}
                     variants={mobileItemVariants}
                     initial="hidden"
                     animate="visible"
+                    className="pt-3 space-y-2"
                   >
-                    {link.submenu ? (
-                      <div>
-                        <button
-                          onClick={() =>
-                            setMobileExpanded(
-                              mobileExpanded === link.label ? null : link.label,
-                            )
-                          }
-                          className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold uppercase tracking-widest text-white/60 hover:text-white hover:bg-white/5 transition-all duration-200 group"
-                        >
-                          <span className="group-hover:text-white transition-colors">
-                            {link.label}
-                          </span>
-                          <motion.div
-                            animate={{
-                              rotate: mobileExpanded === link.label ? 180 : 0,
-                            }}
-                            transition={{ duration: 0.25 }}
-                          >
-                            <ChevronDown className="w-4 h-4" />
-                          </motion.div>
-                        </button>
-                        <AnimatePresence>
-                          {mobileExpanded === link.label && (
-                            <motion.div
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: "auto" }}
-                              exit={{ opacity: 0, height: 0 }}
-                              transition={{ duration: 0.25 }}
-                              className="overflow-hidden ml-3 mt-1 pl-3 border-l border-violet-500/20"
-                            >
-                              {link.submenu.map((item, subIdx) => {
-                                const Icon = item.icon;
-                                return (
-                                  <motion.a
-                                    key={item.href}
-                                    href={item.href}
-                                    initial={{ opacity: 0, x: -8 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: subIdx * 0.05 }}
-                                    onClick={() => setOpenMobile(false)}
-                                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 group transition-colors duration-200"
-                                  >
-                                    <div className="w-7 h-7 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center group-hover:bg-violet-500/20 transition-colors shrink-0">
-                                      <Icon className="w-3.5 h-3.5 text-violet-400" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                      <div className="flex items-center gap-2">
-                                        <span className="text-sm text-white/70 group-hover:text-white transition-colors font-medium">
-                                          {item.label}
-                                        </span>
-                                        {item.badge && (
-                                          <span
-                                            className={cn(
-                                              "text-[9px] font-bold px-1.5 py-0.5 rounded-full border",
-                                              badgeStyles[item.badge] ??
-                                                "bg-violet-500/20 text-violet-300 border-violet-500/30",
-                                            )}
-                                          >
-                                            {item.badge}
-                                          </span>
-                                        )}
-                                      </div>
-                                      <p className="text-[11px] text-white/30 mt-0.5 line-clamp-1">
-                                        {item.description}
-                                      </p>
-                                    </div>
-                                  </motion.a>
-                                );
-                              })}
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    ) : (
-                      <motion.a
-                        href={link.href}
-                        onClick={() => setOpenMobile(false)}
-                        whileHover={{ x: 4 }}
-                        className="block px-4 py-3 rounded-xl text-sm font-semibold uppercase tracking-widest text-white/60 hover:text-white hover:bg-white/5 transition-all duration-200"
+                    <Separator className="bg-slate-100" />
+                    <Button
+                      variant="ghost"
+                      className="w-full text-[#17123a]/60 hover:text-[#17123a] hover:bg-slate-50 rounded-xl h-11 text-sm font-semibold"
+                    >
+                      Connexion
+                    </Button>
+                    <Button className="w-full relative overflow-hidden bg-linear-to-r from-violet-600 to-indigo-600 text-white rounded-xl h-11 text-sm font-bold shadow-lg shadow-violet-500/30 group border-0">
+                      <a
+                        href="/devis"
+                        className="flex items-center justify-center gap-2"
                       >
-                        {link.label}
-                      </motion.a>
-                    )}
+                        <span className="absolute inset-0 bg-linear-to-r from-transparent via-white/15 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                        <ClipboardList className="w-4 h-4 relative z-10" />
+                        <span className="relative z-10">
+                          Mon devis {count > 0 && `(${count})`}
+                        </span>
+                      </a>
+                    </Button>
                   </motion.div>
-                ))}
-
-                {/* Mobile CTA */}
-                <motion.div
-                  custom={navLinks.length}
-                  variants={mobileItemVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className="pt-3 space-y-2"
-                >
-                  <Separator className="bg-white/5" />
-                  <Button
-                    variant="ghost"
-                    className="w-full text-white/60 hover:text-white hover:bg-white/5 rounded-xl h-11 text-sm font-semibold"
-                  >
-                    Connexion
-                  </Button>
-                  <Button className="w-full relative overflow-hidden bg-linear-to-r from-violet-600 to-indigo-600 text-white rounded-xl h-11 text-sm font-bold shadow-lg shadow-violet-500/25 group border-0">
-                    <span className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-                    <Sparkles className="w-4 h-4 mr-2 relative z-10" />
-                    <span className="relative z-10">Réserver maintenant</span>
-                  </Button>
-                </motion.div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.nav>
-    </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.nav>
+      </div>
+    </TooltipProvider>
   );
 }

@@ -12,7 +12,7 @@ import {
   useBreakpoint,
 } from "@/src/hooks/useBreakpoint";
 
-useGLTF.preload("/models/macbook-m5-pro.glb");
+useGLTF.preload("/models/macbook-m5-pro.draco.glb");
 
 type GLTFResult = GLTF & {
   nodes: { [key: string]: THREE.Mesh };
@@ -105,11 +105,11 @@ const TEX_FADE_DURATION = 0.45;
 const RESPONSIVE_3D = {
   desktop: {
     initFromY: -3.5,
-    initRestY: -1.8,
+    initRestY: -2.06,
     initFromRotY: THREE.MathUtils.degToRad(8),
-    openRestY: -1.2,
-    scaleOpen: 0.15,
-    scaleClose: 0.13,
+    openRestY: -1.35,
+    scaleOpen: 0.155,
+    scaleClose: 0.14,
     scene2: { x: -1.2, y: -1.75, z: 0.5 },
     scene2rot: {
       y: THREE.MathUtils.degToRad(42),
@@ -125,9 +125,9 @@ const RESPONSIVE_3D = {
   },
   tablet: {
     initFromY: -3.2,
-    initRestY: -1.6,
+    initRestY: -1.8,
     initFromRotY: THREE.MathUtils.degToRad(6),
-    openRestY: -1.0,
+    openRestY: -1.15,
     scaleOpen: 0.11,
     scaleClose: 0.1,
     scene2: { x: -0.7, y: -1.5, z: 0 },
@@ -145,9 +145,9 @@ const RESPONSIVE_3D = {
   },
   mobile: {
     initFromY: -1.0,
-    initRestY: -1.0,
+    initRestY: -1.15,
     initFromRotY: THREE.MathUtils.degToRad(4),
-    openRestY: -1.5,
+    openRestY: -1.62,
     scaleOpen: 0.09,
     scaleClose: 0.08,
     scene2: { x: 0, y: -1.5, z: 0 },
@@ -187,7 +187,7 @@ export function LaptopScene() {
   const cfg = RESPONSIVE_3D[bp];
 
   const { nodes } = useGLTF(
-    "/models/macbook-m5-pro.glb",
+    "/models/macbook-m5-pro.draco.glb",
   ) as unknown as GLTFResult;
 
   // Images touristiques de Nosy Be pour l'écran
@@ -210,13 +210,17 @@ export function LaptopScene() {
     texturesRef.current = [tex1, tex2, tex3, tex4];
 
     if (screenMeshRef.current) {
-      const mat = new THREE.MeshStandardMaterial({
+      const mat = new THREE.MeshPhysicalMaterial({
         map: tex1,
         emissiveMap: tex1,
         emissive: new THREE.Color(0xffffff),
         emissiveIntensity: 0,
-        roughness: 0.05,
-        metalness: 0.0,
+        roughness: 0.22, // avant 0.05 → trop "miroir"
+        metalness: 0,
+        specularIntensity: 0.12, // ← tue le halo blanc (réflexion quasi nulle)
+        specularColor: new THREE.Color("#cfc6ff"), // reflet résiduel violet doux
+        clearcoat: 0,
+        envMapIntensity: 0,
       });
       screenMeshRef.current.material = mat;
       mat.needsUpdate = true;
@@ -233,6 +237,9 @@ export function LaptopScene() {
       if (nodes[name]) {
         nodes[name].castShadow = true;
         nodes[name].receiveShadow = true;
+
+        // Keep the original GLB materials/textures intact.
+        // The light redesign changes the environment, not the MacBook's baked material.
       }
     });
   }, [nodes, tex1, tex2, tex3, tex4]);

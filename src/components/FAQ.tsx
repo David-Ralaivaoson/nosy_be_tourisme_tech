@@ -4,46 +4,44 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ChevronDown, HelpCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-
 gsap.registerPlugin(ScrollTrigger);
 
 const faqs = [
   {
-    question: "Combien de jours faut-il pour visiter Nosy Be ?",
+    question: "Quand voir les baleines à bosse à Sainte-Marie ?",
     answer:
-      "Nous recommandons un minimum de 7 jours pour profiter pleinement de Nosy Be et de ses îles environnantes. Un séjour de 10-14 jours est idéal pour explorer Hell Ville, Nosy Komba, Nosy Tanikely, Lokobe et Nosy Iranja sans se presser.",
+      "De juillet à octobre, avec un pic en août–septembre. Les baleines à bosse viennent se reproduire et mettre bas dans le canal de Sainte-Marie. Nos safaris respectent la charte d'approche officielle.",
   },
   {
-    question: "Est-ce que Nosy Be est une destination sûre ?",
+    question: "Comment se rendre à Sainte-Marie ?",
     answer:
-      "Oui, Nosy Be est considérée comme l'une des destinations les plus sûres de Madagascar. Les touristes sont bien accueillis et les zones touristiques sont sécurisées. Comme partout, il faut prendre des précautions de base.",
+      "Deux options : vol direct depuis Antananarivo (1h15, aéroport SMS) ou bateau depuis Soanierana-Ivongo (1h30–2h de traversée). Nous organisons vos transferts aéroport ou port vers votre hôtel.",
   },
   {
-    question: "Quel budget prévoir pour un séjour à Nosy Be ?",
+    question: "Combien de jours prévoir ?",
     answer:
-      "Pour un voyageur en mode backpacker, comptez 40-60€ par jour. Pour un séjour confortable en hôtel 3-4 étoiles avec excursions, prévoyez 120-200€ par jour.",
+      "5 à 7 jours minimum pour profiter de l'île et de l'Île aux Nattes. 10 jours si vous voulez combiner safari baleines, plongée et farniente sans vous presser.",
   },
   {
-    question: "Faut-il parler malgache pour voyager à Nosy Be ?",
+    question: "Faut-il louer une voiture sur place ?",
     answer:
-      "Non, le français est largement parlé à Nosy Be, c'est une langue officielle de Madagascar. Vous pourrez communiquer facilement dans les hôtels, restaurants et avec les guides.",
+      "Non, l'île se découvre à pied, en pirogue, quad, scooter ou tuk-tuk avec chauffeur. L'Île aux Nattes est 100% sans voiture ! Nous proposons toutes ces locations dans le configurateur de devis.",
   },
   {
-    question: "Quels vaccins sont obligatoires pour Madagascar ?",
+    question: "L'île est-elle sûre ?",
     answer:
-      "Aucun vaccin n'est obligatoire (sauf fièvre jaune si vous venez d'une zone endémique). Cependant, les vaccins recommandés sont : hépatite A et B, typhoïde, tétanos, et un traitement antipaludéen est fortement conseillé.",
+      "Oui, Sainte-Marie est une destination tranquille et accueillante. Comme partout, gardez les précautions de base avec vos objets de valeur.",
   },
   {
-    question: "Peut-on voir des lémuriens à Nosy Be ?",
+    question: "Quel budget prévoir ?",
     answer:
-      "Oui ! Nosy Komba (l'île aux lémuriens) est célèbre pour ses lémuriens macaques noirs qui viennent à la rencontre des visiteurs. La réserve de Lokobe abrite également des espèces endémiques.",
+      "Comptez 40–60€/jour en mode backpacker, 100–180€/jour pour un séjour confortable avec hébergement en lodge et excursions. Le devis en ligne vous donne le total exact en Ariary en 2 minutes.",
   },
 ];
 
 export function FAQ() {
   const container = useRef<HTMLDivElement>(null);
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
-
+  const [open, setOpen] = useState<number | null>(0);
   useEffect(() => {
     if (!container.current) return;
     const ctx = gsap.context(() => {
@@ -71,49 +69,49 @@ export function FAQ() {
   return (
     <section
       ref={container}
-      className="py-32 px-4 md:px-12 lg:px-24 bg-[#050505] relative z-20 border-t border-white/5"
+      className="py-32 px-4 md:px-12 lg:px-24 bg-white relative z-20 border-t border-slate-100"
     >
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-violet-500/10 border border-violet-500/20">
-            <HelpCircle className="w-4 h-4 text-violet-400" />
-            <span className="text-xs uppercase tracking-widest text-violet-400 font-bold">
+          <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-violet-50 border border-violet-200">
+            <HelpCircle className="w-4 h-4 text-violet-600" />
+            <span className="text-xs uppercase tracking-widest text-violet-700 font-bold">
               FAQ
             </span>
           </div>
-          <h2 className="text-4xl md:text-5xl font-light mb-4 tracking-tight">
+          <h2 className="text-4xl md:text-5xl font-light mb-4 tracking-tight text-[#17123a]">
             Questions{" "}
-            <span className="italic font-serif text-violet-400">
+            <span className="italic font-serif text-violet-600">
               fréquentes
             </span>
           </h2>
-          <p className="text-gray-400 text-lg font-light">
-            Tout ce que vous devez savoir avant votre voyage à Nosy Be
+          <p className="text-[#17123a]/50 text-lg font-light">
+            Tout ce qu'il faut savoir avant votre voyage à Sainte-Marie
           </p>
         </div>
         <div className="space-y-3">
-          {faqs.map((faq, i) => (
+          {faqs.map((f, i) => (
             <div
               key={i}
-              className="faq-item bg-[#151515] rounded-2xl border border-white/5 overflow-hidden hover:border-violet-500/20 transition-all"
+              className="faq-item bg-[#fbfaff] rounded-2xl border border-slate-200 overflow-hidden hover:border-violet-200 transition-all"
             >
               <button
-                onClick={() => setOpenIndex(openIndex === i ? null : i)}
+                onClick={() => setOpen(open === i ? null : i)}
                 className="w-full p-6 flex items-center justify-between gap-4 text-left group"
               >
-                <span className="text-base md:text-lg font-medium group-hover:text-violet-400 transition-colors">
-                  {faq.question}
+                <span className="text-base md:text-lg font-medium text-[#17123a] group-hover:text-violet-700 transition-colors">
+                  {f.question}
                 </span>
                 <motion.div
-                  animate={{ rotate: openIndex === i ? 180 : 0 }}
+                  animate={{ rotate: open === i ? 180 : 0 }}
                   transition={{ duration: 0.3 }}
                   className="shrink-0"
                 >
-                  <ChevronDown className="w-5 h-5 text-violet-400" />
+                  <ChevronDown className="w-5 h-5 text-violet-600" />
                 </motion.div>
               </button>
               <AnimatePresence>
-                {openIndex === i && (
+                {open === i && (
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
@@ -121,8 +119,8 @@ export function FAQ() {
                     transition={{ duration: 0.3 }}
                     className="overflow-hidden"
                   >
-                    <div className="px-6 pb-6 text-white/60 leading-relaxed">
-                      {faq.answer}
+                    <div className="px-6 pb-6 text-[#17123a]/60 leading-relaxed">
+                      {f.answer}
                     </div>
                   </motion.div>
                 )}

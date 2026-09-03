@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { cn } from "@/lib/utils"; // Assure-toi d'avoir cet utilitaire shadcn
+import { cn } from "@/src/lib/utils"; // Assure-toi d'avoir cet utilitaire shadcn
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -11,16 +11,16 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
-import { Button } from "@/components/ui/button";
+} from "@/src/components/ui/navigation-menu";
+import { Button } from "@/src/components/ui/button";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet";
-import { Badge } from "@/components/ui/badge";
+} from "@/src/components/ui/sheet";
+import { Badge } from "@/src/components/ui/badge";
 import {
   Menu,
   X,

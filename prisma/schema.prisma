@@ -1,0 +1,510 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  directUrl         = env("DIRECT_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum AdminRole {
+  ADMIN
+  EDITOR
+}
+
+enum AccommodationCategory {
+  HOTEL
+  BUNGALOW
+  VILLA
+  ECOLODGE
+  LUXE
+  GUEST_HOUSE
+}
+
+enum AccommodationZone {
+  NORTH
+  SOUTH
+  WEST
+  EAST
+  CENTER
+}
+
+enum TransportType {
+  TRANSFER
+  VEHICLE_RENTAL
+}
+
+enum TransportUnit {
+  TRIP
+  DAY
+}
+
+enum TransportBookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+enum QuoteStatus {
+  DRAFT
+  SUBMITTED
+  EMAIL_SENT
+  CONTACTED
+  CONFIRMED
+  CANCELLED
+  ARCHIVED
+}
+
+enum QuoteItemType {
+  ACCOMMODATION
+  EXCURSION
+  TRANSPORT
+  ADDITIONAL_SERVICE
+}
+
+enum EmailStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+enum ContactStatus {
+  NEW
+  CONTACTED
+  CLOSED
+}
+
+enum RealEstateInquiryStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  ARCHIVED
+}
+
+enum TerrainStatut {
+  TITRE_BORNE
+  BORNE
+  EN_COURS
+}
+
+// ============================================================
+// ADMIN
+// ============================================================
+
+model AdminUser {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         AdminRole @default(ADMIN)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("admin_users")
+}
+
+// ============================================================
+// ACCOMMODATIONS
+// ============================================================
+
+model Accommodation {
+  id                      String                @id @default(cuid())
+  slug                    String                @unique
+  name                    String
+  category                AccommodationCategory
+  zone                    AccommodationZone
+  descriptionFr           String?
+  descriptionEn           String?
+  pricePerNightLowSeason  Int
+  pricePerNightHighSeason Int
+  capacity                Int                   @default(2)
+  stars                   Int                   @default(3)
+  rating                  Float?
+  amenities               String[]              @default([])
+  latitude                Float?
+  longitude               Float?
+  isActive                Boolean               @default(true)
+  isFeatured              Boolean               @default(false)
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
+
+  images      AccommodationImage[]
+  seasonRates SeasonRate[]
+  quoteItems  QuoteItem[]
+
+  @@index([zone])
+  @@index([category])
+  @@index([isActive])
+  @@map("accommodations")
+}
+
+model AccommodationImage {
+  id              String   @id @default(cuid())
+  accommodationId String
+  url             String
+  altFr           String?
+  altEn           String?
+  sortOrder       Int      @default(0)
+  isPrimary       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  accommodation Accommodation @relation(fields: [accommodationId], references: [id], onDelete: Cascade)
+
+  @@index([accommodationId])
+  @@map("accommodation_images")
+}
+
+model SeasonRate {
+  id              String   @id @default(cuid())
+  accommodationId String
+  label           String?
+  startDate       DateTime @db.Date
+  endDate         DateTime @db.Date
+  pricePerNight   Int
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  accommodation Accommodation @relation(fields: [accommodationId], references: [id], onDelete: Cascade)
+
+  @@index([accommodationId, startDate, endDate])
+  @@map("season_rates")
+}
+
+// ============================================================
+// EXCURSIONS
+// ============================================================
+
+model Excursion {
+  id               String   @id @default(cuid())
+  slug             String   @unique
+  name             String
+  descriptionFr    String?
+  descriptionEn    String?
+  pricePerPerson   Int
+  duration         String
+  includesLunch    Boolean  @default(false)
+  includesTransfer Boolean  @default(false)
+  latitude         Float?
+  longitude        Float?
+  isActive         Boolean  @default(true)
+  isFeatured       Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  images     ExcursionImage[]
+  quoteItems QuoteItem[]
+
+  @@index([isActive])
+  @@map("excursions")
+}
+
+model ExcursionImage {
+  id          String   @id @default(cuid())
+  excursionId String
+  url         String
+  altFr       String?
+  altEn       String?
+  sortOrder   Int      @default(0)
+  isPrimary   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  excursion Excursion @relation(fields: [excursionId], references: [id], onDelete: Cascade)
+
+  @@index([excursionId])
+  @@map("excursion_images")
+}
+
+// ============================================================
+// TRANSPORTS
+// ============================================================
+
+model TransportOption {
+  id            String        @id @default(cuid())
+  slug          String        @unique
+  name          String
+  transportType TransportType @map("type")
+  price         Int
+  unit          TransportUnit
+  withDriver    Boolean       @default(false)
+  capacity      Int?
+  descriptionFr String?
+  descriptionEn String?
+  isActive      Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  quoteItems     QuoteItem[]
+  availabilities TransportAvailability[]
+  bookings       TransportBooking[]
+
+  @@index([transportType])
+  @@index([isActive])
+  @@map("transport_options")
+}
+
+model TransportAvailability {
+  id                String   @id @default(cuid())
+  transportOptionId String
+  date              DateTime @db.Date
+  isAvailable       Boolean  @default(true)
+  notes             String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  transportOption TransportOption @relation(fields: [transportOptionId], references: [id], onDelete: Cascade)
+
+  @@unique([transportOptionId, date])
+  @@map("transport_availabilities")
+}
+
+model TransportBooking {
+  id                String                 @id @default(cuid())
+  transportOptionId String
+  startDate         DateTime               @db.Date
+  endDate           DateTime               @db.Date
+  status            TransportBookingStatus @default(PENDING)
+  quoteId           String?
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+
+  transportOption TransportOption @relation(fields: [transportOptionId], references: [id], onDelete: Cascade)
+  quote           Quote?          @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+
+  @@index([transportOptionId, startDate, endDate])
+  @@map("transport_bookings")
+}
+
+// ============================================================
+// REAL ESTATE
+// ============================================================
+
+model Terrain {
+  id            String        @id @default(cuid())
+  slug          String        @unique
+  title         String
+  surface       Int
+  statut        TerrainStatut
+  price         Int
+  vueMer        Boolean       @default(false)
+  eau           Boolean       @default(false)
+  electricite   Boolean       @default(false)
+  exclusivite   Boolean       @default(false)
+  descriptionFr String?
+  descriptionEn String?
+  latitude      Float?
+  longitude     Float?
+  isActive      Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  images    TerrainImage[]
+  documents TerrainDocument[]
+  inquiries RealEstateInquiry[]
+
+  @@index([isActive])
+  @@map("terrains")
+}
+
+model TerrainImage {
+  id        String   @id @default(cuid())
+  terrainId String
+  url       String
+  altFr     String?
+  altEn     String?
+  sortOrder Int      @default(0)
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  terrain Terrain @relation(fields: [terrainId], references: [id], onDelete: Cascade)
+
+  @@index([terrainId])
+  @@map("terrain_images")
+}
+
+model TerrainDocument {
+  id         String   @id @default(cuid())
+  terrainId  String
+  label      String
+  url        String
+  type       String?
+  isPublic   Boolean  @default(false)
+  uploadedAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  terrain Terrain @relation(fields: [terrainId], references: [id], onDelete: Cascade)
+
+  @@index([terrainId])
+  @@map("terrain_documents")
+}
+
+model RealEstateInquiry {
+  id        String                  @id @default(cuid())
+  terrainId String
+  name      String
+  email     String
+  phone     String?
+  whatsapp  String?
+  message   String?
+  status    RealEstateInquiryStatus @default(NEW)
+  createdAt DateTime                @default(now())
+  updatedAt DateTime                @updatedAt
+
+  terrain Terrain @relation(fields: [terrainId], references: [id], onDelete: Cascade)
+
+  @@index([terrainId])
+  @@map("real_estate_inquiries")
+}
+
+// ============================================================
+// QUOTES / DEVIS
+// ============================================================
+
+model Quote {
+  id             String      @id @default(cuid())
+  quoteNumber    String      @unique
+  token          String      @unique @default(cuid())
+  status         QuoteStatus @default(DRAFT)
+  arrivalDate    DateTime?   @db.Date
+  departureDate  DateTime?   @db.Date
+  guests         Int         @default(2)
+  clientName     String
+  clientEmail    String
+  clientWhatsapp String
+  notes          String?
+  total          Int         @default(0)
+  currency       String      @default("MGA")
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  items             QuoteItem[]
+  emailLogs         EmailLog[]
+  transportBookings TransportBooking[]
+
+  @@index([status])
+  @@index([clientEmail])
+  @@map("quotes")
+}
+
+model QuoteItem {
+  id             String        @id @default(cuid())
+  quoteId        String
+  itemType       QuoteItemType
+  referenceId    String?
+  label          String
+  description    String?
+  unitPrice      Int
+  quantity       Int           @default(1)
+  numberOfNights Int?
+  numberOfPeople Int?
+  total          Int
+  metadata       Json?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  quote Quote @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+
+  accommodationId String?
+  accommodation   Accommodation? @relation(fields: [accommodationId], references: [id], onDelete: SetNull)
+
+  excursionId String?
+  excursion   Excursion? @relation(fields: [excursionId], references: [id], onDelete: SetNull)
+
+  transportId String?
+  transport   TransportOption? @relation(fields: [transportId], references: [id], onDelete: SetNull)
+
+  // AJOUTE CES 2 LIGNES :
+  additionalServiceId String?
+  additionalService   AdditionalService? @relation(fields: [additionalServiceId], references: [id], onDelete: SetNull)
+
+  @@index([quoteId])
+  @@index([itemType])
+  @@map("quote_items")
+}
+
+model EmailLog {
+  id           String      @id @default(cuid())
+  quoteId      String?
+  to           String
+  subject      String
+  status       EmailStatus @default(PENDING)
+  provider     String      @default("resend")
+  providerId   String?
+  errorMessage String?
+  payload      Json?
+  sentAt       DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  quote Quote? @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+
+  @@index([quoteId])
+  @@map("email_logs")
+}
+
+// ============================================================
+// CONTACT & REVIEWS
+// ============================================================
+
+model ContactMessage {
+  id        String        @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  whatsapp  String?
+  subject   String?
+  message   String
+  status    ContactStatus @default(NEW)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@map("contact_messages")
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  name      String
+  country   String?
+  rating    Int
+  comment   String?
+  tripType  String?
+  isVisible Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("reviews")
+}
+
+model AdditionalService {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?  @db.Text
+  price       Int      // Prix en Ariary
+  unit        ServiceUnit @default(PERSON)
+  icon        String?  // Nom de l'icône lucide
+  isFeatured  Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  quoteItems  QuoteItem[]
+  
+  @@map("additional_services")
+}
+
+enum ServiceUnit {
+  PERSON    // Par personne
+  DAY       // Par jour
+  FLAT      // Prix fixe (une fois)
+}

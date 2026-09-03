@@ -75,7 +75,7 @@ const MESH_LIST = [
 
 export function MacbookDebug(props: JSX.IntrinsicElements["group"]) {
   const { nodes, materials } = useGLTF(
-    "/models/macbook-m5-pro.glb",
+    "/models/macbook-m5-pro.draco.glb",
   ) as unknown as GLTFResult;
 
   // ← Refs vers les vrais objets Three.js dans la scène
@@ -234,4 +234,4 @@ export function MacbookDebug(props: JSX.IntrinsicElements["group"]) {
   );
 }
 
-useGLTF.preload("/models/macbook-m5-pro.glb");
+useGLTF.preload("/models/macbook-m5-pro.draco.glb");

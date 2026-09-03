@@ -3,7 +3,6 @@ import { useRef, useEffect, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Mail, Phone, MapPin, Send, CheckCircle } from "lucide-react";
-
 gsap.registerPlugin(ScrollTrigger);
 
 export function Contact() {
@@ -40,133 +39,129 @@ export function Contact() {
     setTimeout(() => setSubmitted(false), 3000);
   };
 
+  const input =
+    "w-full px-4 py-3 bg-[#fbfaff] border border-slate-200 rounded-lg focus:border-violet-400 focus:ring-2 focus:ring-violet-500/20 transition-all outline-none text-[#17123a] placeholder:text-[#17123a]/35";
+  const label =
+    "text-xs uppercase tracking-wider text-[#17123a]/55 mb-2 block font-semibold";
+
   return (
     <section
       ref={container}
       id="contact"
-      className="py-32 px-4 md:px-12 lg:px-24 bg-[#0a0a0a] relative z-20 border-t border-white/5"
+      className="py-32 px-4 md:px-12 lg:px-24 bg-white relative z-20 border-t border-slate-100"
     >
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+          {/* Colonne infos */}
           <div className="contact-content">
-            <div className="text-xs uppercase tracking-widest text-violet-400 font-bold mb-4">
+            <div className="text-xs uppercase tracking-widest text-violet-600 font-bold mb-4">
               Contactez-nous
             </div>
-            <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight">
+            <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight text-[#17123a]">
               Prêt à partir pour{" "}
-              <span className="italic font-serif text-violet-400">
-                Nosy Be ?
+              <span className="italic font-serif text-violet-600">
+                Sainte-Marie ?
               </span>
             </h2>
-            <p className="text-lg text-white/60 leading-relaxed mb-10">
-              Notre équipe d'experts locaux est à votre disposition pour créer
-              le voyage de vos rêves. Devis personnalisé en 24h.
+            <p className="text-lg text-[#17123a]/60 leading-relaxed mb-10">
+              Notre équipe locale est à votre disposition pour créer le voyage
+              de vos rêves. Réponse WhatsApp en moins d'1h, devis personnalisé
+              en 24h.
             </p>
             <div className="space-y-6">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-violet-500/10 flex items-center justify-center shrink-0">
-                  <Mail className="w-5 h-5 text-violet-400" />
+                <div className="w-12 h-12 rounded-xl bg-violet-50 border border-violet-100 flex items-center justify-center shrink-0">
+                  <Mail className="w-5 h-5 text-violet-600" />
                 </div>
                 <div>
-                  <div className="text-xs text-white/40 uppercase tracking-wider mb-1">
+                  <div className="text-xs text-[#17123a]/45 uppercase tracking-wider mb-1">
                     Email
                   </div>
                   <a
-                    href="mailto:contact@nosybe-guide.mg"
-                    className="text-white hover:text-violet-400 transition-colors"
+                    href="mailto:contact@sainte-marie-travel.mg"
+                    className="text-[#17123a] hover:text-violet-600 transition-colors"
                   >
-                    contact@nosybe-guide.mg
+                    contact@sainte-marie-travel.mg
                   </a>
                 </div>
               </div>
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
-                  <Phone className="w-5 h-5 text-emerald-400" />
+                <div className="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0">
+                  <Phone className="w-5 h-5 text-emerald-600" />
                 </div>
                 <div>
-                  <div className="text-xs text-white/40 uppercase tracking-wider mb-1">
-                    Téléphone
+                  <div className="text-xs text-[#17123a]/45 uppercase tracking-wider mb-1">
+                    WhatsApp / Téléphone
                   </div>
                   <a
-                    href="tel:+261341234567"
-                    className="text-white hover:text-emerald-400 transition-colors"
+                    href="https://wa.me/261328030046"
+                    className="text-[#17123a] hover:text-emerald-600 transition-colors"
                   >
-                    +261 34 12 345 67
+                    +261 32 80 300 46
                   </a>
                 </div>
               </div>
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
-                  <MapPin className="w-5 h-5 text-amber-400" />
+                <div className="w-12 h-12 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center shrink-0">
+                  <MapPin className="w-5 h-5 text-amber-600" />
                 </div>
                 <div>
-                  <div className="text-xs text-white/40 uppercase tracking-wider mb-1">
+                  <div className="text-xs text-[#17123a]/45 uppercase tracking-wider mb-1">
                     Adresse
                   </div>
-                  <p className="text-white">
-                    Rue du Commerce, Hell Ville
+                  <p className="text-[#17123a]">
+                    Ambodifotatra
                     <br />
-                    Nosy Be 207, Madagascar
+                    Île Sainte-Marie, Madagascar
                   </p>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Colonne formulaire */}
           <div className="contact-content">
             <form
               onSubmit={handleSubmit}
-              className="bg-[#151515] rounded-2xl border border-white/5 p-8 space-y-6"
+              className="bg-[#fbfaff] rounded-2xl border border-slate-200 p-8 space-y-6 shadow-sm"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs uppercase tracking-wider text-white/60 mb-2 block">
-                    Prénom
-                  </label>
+                  <label className={label}>Prénom</label>
                   <input
                     type="text"
                     required
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-violet-500/50 focus:bg-white/10 transition-all outline-none"
+                    className={input}
                     placeholder="Jean"
                   />
                 </div>
                 <div>
-                  <label className="text-xs uppercase tracking-wider text-white/60 mb-2 block">
-                    Nom
-                  </label>
+                  <label className={label}>Nom</label>
                   <input
                     type="text"
                     required
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-violet-500/50 focus:bg-white/10 transition-all outline-none"
+                    className={input}
                     placeholder="Dupont"
                   />
                 </div>
               </div>
               <div>
-                <label className="text-xs uppercase tracking-wider text-white/60 mb-2 block">
-                  Email
-                </label>
+                <label className={label}>Email</label>
                 <input
                   type="email"
                   required
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-violet-500/50 focus:bg-white/10 transition-all outline-none"
+                  className={input}
                   placeholder="jean@example.com"
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs uppercase tracking-wider text-white/60 mb-2 block">
-                    Date de voyage
-                  </label>
-                  <input
-                    type="date"
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-violet-500/50 focus:bg-white/10 transition-all outline-none"
-                  />
+                  <label className={label}>Date de voyage</label>
+                  <input type="date" className={input} />
                 </div>
                 <div>
-                  <label className="text-xs uppercase tracking-wider text-white/60 mb-2 block">
-                    Personnes
-                  </label>
-                  <select className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-violet-500/50 focus:bg-white/10 transition-all outline-none">
+                  <label className={label}>Personnes</label>
+                  <select className={input}>
                     <option value="1">1 personne</option>
                     <option value="2">2 personnes</option>
                     <option value="3-4">3-4 personnes</option>
@@ -175,19 +170,17 @@ export function Contact() {
                 </div>
               </div>
               <div>
-                <label className="text-xs uppercase tracking-wider text-white/60 mb-2 block">
-                  Votre projet
-                </label>
+                <label className={label}>Votre projet</label>
                 <textarea
                   rows={4}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-violet-500/50 focus:bg-white/10 transition-all outline-none resize-none"
-                  placeholder="Parlez-nous de vos envies..."
+                  className={input + " resize-none"}
+                  placeholder="Safari baleines, Île aux Nattes, séjour détente…"
                 />
               </div>
               <button
                 type="submit"
                 disabled={submitted}
-                className="w-full py-4 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 rounded-lg font-bold uppercase tracking-wider text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-70 group"
+                className="w-full py-4 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 rounded-lg font-bold uppercase tracking-wider text-sm text-white flex items-center justify-center gap-2 transition-all disabled:opacity-70 group shadow-lg shadow-violet-500/25"
               >
                 {submitted ? (
                   <>

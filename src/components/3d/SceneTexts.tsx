@@ -1,32 +1,30 @@
+"use client";
 import { Breakpoint, getBreakpoint } from "@/src/hooks/useBreakpoint";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { SurMesureHeading } from "./Handwritten";
+import { Compass } from "lucide-react";
+import { SainteMarieUnderline } from "./Handwritten";
 
-// ─── Compteur animé ───────────────────────────────────────────────────────────
 function AnimatedCounter({
   target,
   suffix = "",
-  prefix = "",
   duration = 1800,
   color,
 }: {
   target: number;
   suffix?: string;
-  prefix?: string;
   duration?: number;
   color: string;
 }) {
   const [value, setValue] = useState(0);
   const [started, setStarted] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !started) {
+      ([e]) => {
+        if (e.isIntersecting && !started) {
           setStarted(true);
           obs.disconnect();
         }
@@ -36,7 +34,6 @@ function AnimatedCounter({
     obs.observe(el);
     return () => obs.disconnect();
   }, [started]);
-
   useEffect(() => {
     if (!started) return;
     const start = performance.now();
@@ -49,11 +46,9 @@ function AnimatedCounter({
     };
     requestAnimationFrame(raf);
   }, [started, target, duration]);
-
   return (
     <div ref={ref}>
       <span style={{ color, fontWeight: 900 }}>
-        {prefix}
         {value}
         {suffix}
       </span>
@@ -61,7 +56,6 @@ function AnimatedCounter({
   );
 }
 
-// ─── Ligne de feature avec reveal ────────────────────────────────────────────
 function FeatureRow({
   label,
   color,
@@ -84,17 +78,17 @@ function FeatureRow({
         fontWeight: 600,
         letterSpacing: "0.16em",
         textTransform: "uppercase",
-        color: "rgba(255,255,255,0.45)",
+        color: "rgba(23,18,58,0.55)",
         opacity: visible ? 1 : 0,
         transform: visible ? "translateX(0)" : "translateX(-12px)",
-        transition: `opacity 0.5s ease ${delay}ms, transform 0.5s ease ${delay}ms`,
+        transition: `opacity .5s ease ${delay}ms, transform .5s ease ${delay}ms`,
       }}
     >
       <span
         style={{
           width: 14,
           height: 14,
-          borderRadius: "3px",
+          borderRadius: 3,
           border: `1px solid ${color}`,
           display: "flex",
           alignItems: "center",
@@ -103,12 +97,7 @@ function FeatureRow({
         }}
       >
         <span
-          style={{
-            width: 5,
-            height: 5,
-            borderRadius: "1px",
-            background: color,
-          }}
+          style={{ width: 5, height: 5, borderRadius: 1, background: color }}
         />
       </span>
       {label}
@@ -119,161 +108,65 @@ function FeatureRow({
 export function SceneTexts() {
   const [mounted, setMounted] = useState(false);
   const [bp, setBp] = useState<Breakpoint>("desktop");
-
-  const [scene2Visible, setScene2Visible] = useState(false);
-  const [scene3Visible, setScene3Visible] = useState(false);
-  const [scene4Visible, setScene4Visible] = useState(false);
-  const [scene5Visible, setScene5Visible] = useState(false);
-
-  const scene2Ref = useRef<HTMLDivElement>(null);
-  const scene3Ref = useRef<HTMLDivElement>(null);
-  const scene4Ref = useRef<HTMLDivElement>(null);
-  const scene5Ref = useRef<HTMLDivElement>(null);
+  const [s2, setS2] = useState(false);
+  const [s3, setS3] = useState(false);
+  const [s4, setS4] = useState(false);
+  const [s5, setS5] = useState(false);
+  const r2 = useRef<HTMLDivElement>(null);
+  const r3 = useRef<HTMLDivElement>(null);
+  const r4 = useRef<HTMLDivElement>(null);
+  const r5 = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
-    const update = () => setBp(getBreakpoint(window.innerWidth));
-    update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
+    const u = () => setBp(getBreakpoint(window.innerWidth));
+    u();
+    window.addEventListener("resize", u);
+    return () => window.removeEventListener("resize", u);
   }, []);
-
   useEffect(() => {
     if (!mounted) return;
     const pairs: [
       React.RefObject<HTMLDivElement | null>,
       (v: boolean) => void,
     ][] = [
-      [scene2Ref, setScene2Visible],
-      [scene3Ref, setScene3Visible],
-      [scene4Ref, setScene4Visible],
-      [scene5Ref, setScene5Visible],
+      [r2, setS2],
+      [r3, setS3],
+      [r4, setS4],
+      [r5, setS5],
     ];
-
-    const observers = pairs.map(([ref, setter]) => {
-      const obs = new IntersectionObserver(
-        ([entry]) => setter(entry.intersectionRatio > 0.15),
+    const obs = pairs.map(([ref, set]) => {
+      const o = new IntersectionObserver(
+        ([e]) => set(e.intersectionRatio > 0.15),
         { threshold: [0, 0.15, 0.5] },
       );
-      if (ref.current) obs.observe(ref.current);
-      return obs;
+      if (ref.current) o.observe(ref.current);
+      return o;
     });
-
-    return () => observers.forEach((o) => o.disconnect());
+    return () => obs.forEach((o) => o.disconnect());
   }, [mounted]);
-
   if (!mounted) return null;
 
   const isMobile = bp === "mobile";
   const isTablet = bp === "tablet";
-  const mono =
-    "'JetBrains Mono','SF Mono','Fira Code','IBM Plex Mono',monospace";
+  const mono = "'JetBrains Mono','SF Mono','Fira Code',monospace";
 
   return createPortal(
     <>
       <style>{`
         :root { --mono: ${mono}; }
-
-        @keyframes pulse-dot {
-          0%,100% { opacity:.5; transform:scale(1); box-shadow:0 0 0 0 currentColor; }
-          50%      { opacity:1; transform:scale(1.15); box-shadow:0 0 8px 2px currentColor; }
-        }
-        @keyframes line-slide {
-          0%   { transform:scaleY(0); opacity:0; transform-origin:top; }
-          100% { transform:scaleY(1); opacity:1; transform-origin:top; }
-        }
-        @keyframes fade-up {
-          from { opacity:0; transform:translateY(14px); }
-          to   { opacity:1; transform:translateY(0); }
-        }
-        @keyframes fade-right {
-          from { opacity:0; transform:translateX(18px); }
-          to   { opacity:1; transform:translateX(0); }
-        }
-        @keyframes fade-left {
-          from { opacity:0; transform:translateX(-18px); }
-          to   { opacity:1; transform:translateX(0); }
-        }
-        @keyframes gradient-pan {
-          0%,100% { background-position:0% 50%; }
-          50%     { background-position:100% 50%; }
-        }
-        @keyframes blink {
-          0%,100%{ opacity:1; } 50%{ opacity:0; }
-        }
-        @keyframes scan {
-          0%   { transform:translateY(-10%); }
-          100% { transform:translateY(110%); }
-        }
-        @keyframes bar-fill {
-          from { width:0; }
-          to   { width:92%; }
-        }
-        @keyframes corner-draw {
-          from { clip-path:inset(0 100% 100% 0); }
-          to   { clip-path:inset(0 0% 0% 0); }
-        }
-
-        .g-violet {
-          background:linear-gradient(135deg,#a78bfa 0%,#7c3aed 50%,#a78bfa 100%);
-          background-size:200% auto;
-          -webkit-background-clip:text; background-clip:text;
-          -webkit-text-fill-color:transparent;
-          animation:gradient-pan 4s ease infinite;
-        }
-        .g-blue {
-          background:linear-gradient(135deg,#60a5fa 0%,#3b82f6 50%,#60a5fa 100%);
-          background-size:200% auto;
-          -webkit-background-clip:text; background-clip:text;
-          -webkit-text-fill-color:transparent;
-          animation:gradient-pan 4s ease infinite;
-        }
-        .g-emerald {
-          background:linear-gradient(135deg,#34d399 0%,#059669 50%,#34d399 100%);
-          background-size:200% auto;
-          -webkit-background-clip:text; background-clip:text;
-          -webkit-text-fill-color:transparent;
-          animation:gradient-pan 4s ease infinite;
-        }
-
-        .mono { font-family:var(--mono); }
-        .hud  { font-family:var(--mono); font-size:.55rem; letter-spacing:.26em;
-                text-transform:uppercase; color:rgba(255,255,255,.25); }
-
-        .tech-chip {
-          padding:.28rem .72rem; border-radius:4px;
-          font-family:var(--mono); font-size:.54rem; font-weight:700;
-          letter-spacing:.12em; text-transform:uppercase;
-          transition:all .25s ease;
-        }
-
-        .pulse-dot {
-          width:6px; height:6px; border-radius:50%;
-          animation:pulse-dot 2.2s ease-in-out infinite;
-        }
-
-        .wmk {
-          position:absolute; font-family:var(--mono); font-weight:900;
-          color:rgba(255,255,255,.018); line-height:1;
-          user-select:none; pointer-events:none;
-        }
-
-        .corner { position:absolute; width:28px; height:28px; }
-        .corner-tl { top:0; left:0; border-top:1px solid; border-left:1px solid; }
-        .corner-tr { top:0; right:0; border-top:1px solid; border-right:1px solid; }
-        .corner-bl { bottom:0; left:0; border-bottom:1px solid; border-left:1px solid; }
-        .corner-br { bottom:0; right:0; border-bottom:1px solid; border-right:1px solid; }
-
-        .scan-overlay {
-          position:absolute; inset:0; pointer-events:none; overflow:hidden;
-        }
-        .scan-overlay::after {
-          content:''; position:absolute; left:0; right:0; height:60px;
-          background:linear-gradient(to bottom, transparent, rgba(167,139,250,.04), transparent);
-          animation:scan 6s linear infinite;
-        }
+        @keyframes pulse-dot { 0%,100%{opacity:.6;transform:scale(1)} 50%{opacity:1;transform:scale(1.15)} }
+        @keyframes fade-up { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes gradient-pan { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+        @keyframes scan { 0%{transform:translateY(-10%)} 100%{transform:translateY(110%)} }
+        .g-violet{background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 45%,#a78bfa 100%);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gradient-pan 4s ease infinite}
+        .g-blue{background:linear-gradient(135deg,#2563eb 0%,#3b82f6 50%,#60a5fa 100%);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gradient-pan 4s ease infinite}
+        .mono{font-family:var(--mono)}
+        .hud{font-family:var(--mono);font-size:.55rem;letter-spacing:.26em;text-transform:uppercase;color:rgba(23,18,58,.38)}
+        .tech-chip{padding:.28rem .72rem;border-radius:999px;font-family:var(--mono);font-size:.54rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+        .scan-overlay{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+        .scan-overlay::after{content:'';position:absolute;left:0;right:0;height:60px;background:linear-gradient(to bottom,transparent,rgba(124,58,237,.05),transparent);animation:scan 6s linear infinite}
       `}</style>
-
       <div
         id="scene-texts-portal"
         style={{
@@ -282,13 +175,11 @@ export function SceneTexts() {
           zIndex: 15,
           pointerEvents: "none",
           overflow: "hidden",
-          color: "white",
+          color: "#17123a",
           fontFamily: "'Inter','Helvetica Neue',sans-serif",
         }}
       >
-        {/* ════════════════════════════════════════════════════════════════
-            SCENE 1 — HERO
-        ════════════════════════════════════════════════════════════════ */}
+        {/* SCENE 1 — HERO */}
         <div
           className="scene-1-text"
           style={{
@@ -307,69 +198,43 @@ export function SceneTexts() {
             opacity: 1,
           }}
         >
-          {/* Badge */}
-          <div
+          {/* <div
             style={{
               display: "flex",
               alignItems: "center",
-              gap: ".75rem",
-              marginBottom: isMobile ? "1.25rem" : "2rem",
+              gap: ".5rem",
+              padding: ".45rem 1.1rem",
+              marginBottom: isMobile ? "1.5rem" : "2.25rem",
+              border: "1px solid rgba(124,58,237,.22)",
+              borderRadius: 999,
+              background: "rgba(255,255,255,.7)",
+              boxShadow: "0 4px 18px rgba(76,29,149,.08)",
+              backdropFilter: "blur(8px)",
             }}
           >
-            <div
-              style={{
-                width: isMobile ? "2rem" : "3.5rem",
-                height: 1,
-                background:
-                  "linear-gradient(to right,transparent,rgba(167,139,250,.45))",
-              }}
+            <Compass
+              style={{ width: 14, height: 14, color: "#7c3aed" }}
+              strokeWidth={2.4}
             />
-            <div
+            <span
+              className="mono"
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: ".5rem",
-                padding: ".3rem 1rem",
-                border: "1px solid rgba(167,139,250,.14)",
-                borderRadius: "3px",
-                background: "rgba(167,139,250,.04)",
-                backdropFilter: "blur(8px)",
+                fontSize: ".58rem",
+                fontWeight: 700,
+                letterSpacing: ".28em",
+                textTransform: "uppercase",
+                color: "#6d28d9",
               }}
             >
-              <span
-                className="pulse-dot"
-                style={{ background: "#a78bfa", color: "#a78bfa" }}
-              />
-              <span
-                className="mono"
-                style={{
-                  fontSize: ".54rem",
-                  fontWeight: 700,
-                  letterSpacing: ".32em",
-                  textTransform: "uppercase",
-                  color: "rgba(167,139,250,.7)",
-                }}
-              >
-                {isMobile
-                  ? "GUIDE TOURISTIQUE"
-                  : "GUIDE TOURISTIQUE DE NOSY BE"}
-              </span>
-            </div>
-            <div
-              style={{
-                width: isMobile ? "2rem" : "3.5rem",
-                height: 1,
-                background:
-                  "linear-gradient(to left,transparent,rgba(167,139,250,.45))",
-              }}
-            />
-          </div>
-
-          {/* Headline */}
+              {isMobile
+                ? "ÎLE AUX BALEINES"
+                : "GUIDE TOURISTIQUE DE SAINTE-MARIE"}
+            </span>
+          </div> */}
           <div
             style={{
               textAlign: "center",
-              marginBottom: isMobile ? "1.5rem" : "2.5rem",
+              marginBottom: isMobile ? "1.5rem" : "2rem",
             }}
           >
             <h1
@@ -381,11 +246,11 @@ export function SceneTexts() {
                     : "clamp(3.2rem,6.5vw,5.8rem)",
                 display: isMobile ? "block" : "inline-block",
                 fontWeight: 200,
-                lineHeight: 0.8,
+                lineHeight: 1.05,
                 letterSpacing: "-.025em",
                 marginBottom: ".1em",
                 animation: "fade-up .8s ease both",
-                color: "rgba(255,255,255,.9)",
+                color: "#17123a",
               }}
             >
               Découvrez
@@ -398,105 +263,118 @@ export function SceneTexts() {
                     ? "clamp(2.4rem,6vw,4rem)"
                     : "clamp(3.2rem,6.5vw,5.8rem)",
                 display: isMobile ? "block" : "inline-block",
-                marginLeft: isMobile ? 0 : "2rem",
-                fontWeight: 200,
-                lineHeight: 0.8,
+                marginLeft: isMobile ? 0 : "0.4em",
+                fontWeight: 400,
+                lineHeight: 1.05,
                 letterSpacing: "-.025em",
-                marginBottom: ".1em",
+                marginBottom: ".16em",
                 animation: "fade-up .8s .12s ease both",
               }}
             >
-              <span className="g-violet">Nosy Be</span>
+              <SainteMarieUnderline className="g-violet">
+                Sainte-Marie
+              </SainteMarieUnderline>
             </h1>
-            <SurMesureHeading isMobile={isMobile} isTablet={isTablet} />
+            {/* <h1
+              style={{
+                fontSize: isMobile
+                  ? "clamp(1.7rem,8vw,2.6rem)"
+                  : isTablet
+                    ? "clamp(2.1rem,5.5vw,3.5rem)"
+                    : "clamp(2rem,6vw,5rem)",
+                fontWeight: 800,
+                lineHeight: 1,
+                letterSpacing: "-.045em",
+                textTransform: "uppercase",
+                color: "#17123a",
+                animation: "fade-up .8s .24s ease both",
+                margin: 0,
+              }}
+            >
+              sur mesure
+            </h1> */}
           </div>
-
-          {/* Indicateur scroll */}
+          <p
+            style={{
+              maxWidth: 560,
+              textAlign: "center",
+              color: "rgba(23,18,58,.5)",
+              fontSize: isMobile ? ".9rem" : "1.05rem",
+              fontWeight: 300,
+              lineHeight: 1.6,
+              marginBottom: isMobile ? "1.75rem" : "2.5rem",
+              animation: "fade-up .8s .32s ease both",
+            }}
+          >
+            Safari baleines, lagons turquoise et îles préservées.
+            <br />
+            Explorez, réservez, profitez.
+          </p>
+          <a
+            href="#destinations"
+            style={{
+              pointerEvents: "auto",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: ".6rem",
+              padding: isMobile ? ".85rem 1.6rem" : ".95rem 2rem",
+              borderRadius: 999,
+              background: "linear-gradient(135deg,#7c3aed,#4f46e5)",
+              color: "#fff",
+              fontSize: ".72rem",
+              fontWeight: 800,
+              letterSpacing: ".14em",
+              textTransform: "uppercase",
+              textDecoration: "none",
+              boxShadow: "0 12px 28px -8px rgba(124,58,237,.55)",
+              animation: "fade-up .8s .4s ease both",
+            }}
+          >
+            <Compass style={{ width: 15, height: 15 }} strokeWidth={2.4} />
+            Explorer Sainte-Marie
+          </a>
           {!isMobile && (
             <div
               style={{
                 position: "absolute",
-                bottom: isTablet ? "2rem" : "3rem",
+                bottom: "2.75rem",
                 left: "50%",
                 transform: "translateX(-50%)",
                 display: "flex",
-                flexDirection: "column",
                 alignItems: "center",
-                gap: ".55rem",
+                gap: ".5rem",
               }}
             >
+              <span className="hud" style={{ fontSize: ".48rem" }}>
+                01
+              </span>
               <div
                 style={{
-                  width: 1,
-                  height: "3.5rem",
-                  background:
-                    "linear-gradient(to bottom,transparent,rgba(167,139,250,.4))",
+                  width: "1.5rem",
+                  height: 1,
+                  background: "rgba(23,18,58,.12)",
                 }}
               />
+              <span className="hud" style={{ fontSize: ".62rem" }}>
+                Scroll pour explorer
+              </span>
               <div
-                style={{ display: "flex", alignItems: "center", gap: ".5rem" }}
-              >
-                <span className="hud" style={{ fontSize: ".48rem" }}>
-                  01
-                </span>
-                <div
-                  style={{
-                    width: "1.5rem",
-                    height: 1,
-                    background: "rgba(255,255,255,.08)",
-                  }}
-                />
-                <span className="hud" style={{ fontSize: ".62rem" }}>
-                  Scroll pour explorer
-                </span>
-                <div
-                  style={{
-                    width: "1.5rem",
-                    height: 1,
-                    background: "rgba(255,255,255,.08)",
-                  }}
-                />
-                <span className="hud" style={{ fontSize: ".48rem" }}>
-                  05
-                </span>
-              </div>
+                style={{
+                  width: "1.5rem",
+                  height: 1,
+                  background: "rgba(23,18,58,.12)",
+                }}
+              />
+              <span className="hud" style={{ fontSize: ".48rem" }}>
+                05
+              </span>
             </div>
-          )}
-
-          {/* Coins */}
-          {!isMobile && (
-            <>
-              <div
-                style={{
-                  position: "absolute",
-                  top: isTablet ? "5rem" : "5.5rem",
-                  left: isTablet ? "1.5rem" : "2.5rem",
-                  width: 24,
-                  height: 24,
-                  borderTop: "1px solid rgba(167,139,250,.14)",
-                  borderLeft: "1px solid rgba(167,139,250,.14)",
-                }}
-              />
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: isTablet ? "5rem" : "6rem",
-                  right: isTablet ? "1.5rem" : "2.5rem",
-                  width: 24,
-                  height: 24,
-                  borderBottom: "1px solid rgba(167,139,250,.14)",
-                  borderRight: "1px solid rgba(167,139,250,.14)",
-                }}
-              />
-            </>
           )}
         </div>
 
-        {/* ════════════════════════════════════════════════════════════════
-            SCENE 2 — DESTINATIONS & PLAGES
-        ════════════════════════════════════════════════════════════════ */}
+        {/* SCENE 2 — LAGONS & ÎLES */}
         <div
-          ref={scene2Ref}
+          ref={r2}
           className="scene-2-text"
           style={{
             position: "absolute",
@@ -504,38 +382,19 @@ export function SceneTexts() {
             display: "flex",
             alignItems: "center",
             justifyContent: isMobile ? "center" : "flex-end",
-            padding: isMobile
-              ? "0 1.5rem 50vh"
-              : isTablet
-                ? `0 clamp(2rem,6vw,4rem) 35vh`
-                : `0 clamp(2rem,8vw,5rem)`,
+            padding: isMobile ? "0 1.5rem 50vh" : `0 clamp(2rem,8vw,5rem)`,
             opacity: 0,
           }}
         >
           <div className="scan-overlay" />
           <div
             style={{
-              maxWidth: isMobile ? "100%" : "460px",
+              maxWidth: isMobile ? "100%" : 460,
               textAlign: isMobile ? "center" : "right",
               position: "relative",
               zIndex: 1,
             }}
           >
-            {/* Label */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: ".65rem",
-                justifyContent: isMobile ? "center" : "flex-end",
-                marginBottom: "1.5rem",
-                opacity: scene2Visible ? 1 : 0,
-                transform: scene2Visible ? "translateX(0)" : "translateX(16px)",
-                transition: "opacity .5s ease, transform .5s ease",
-              }}
-            ></div>
-
-            {/* Headline */}
             <h2
               style={{
                 fontSize: isMobile
@@ -545,12 +404,13 @@ export function SceneTexts() {
                 lineHeight: 1.08,
                 letterSpacing: "-.025em",
                 marginBottom: ".25rem",
-                opacity: scene2Visible ? 1 : 0,
-                transform: scene2Visible ? "translateX(0)" : "translateX(20px)",
+                color: "#17123a",
+                opacity: s2 ? 1 : 0,
+                transform: s2 ? "translateX(0)" : "translateX(20px)",
                 transition: "opacity .5s .1s ease, transform .5s .1s ease",
               }}
             >
-              Plages & Îles
+              Lagons & Îles
             </h2>
             <h2
               style={{
@@ -561,47 +421,41 @@ export function SceneTexts() {
                 lineHeight: 1,
                 letterSpacing: "-.04em",
                 marginBottom: isMobile ? "1rem" : "1.6rem",
-                opacity: scene2Visible ? 1 : 0,
-                transform: scene2Visible ? "translateX(0)" : "translateX(20px)",
+                opacity: s2 ? 1 : 0,
+                transform: s2 ? "translateX(0)" : "translateX(20px)",
                 transition: "opacity .5s .18s ease, transform .5s .18s ease",
               }}
             >
               <span className="g-violet">paradisiaques.</span>
             </h2>
-
-            {/* Description */}
             {!isMobile && (
               <p
                 style={{
-                  color: "rgba(255,255,255,.32)",
+                  color: "rgba(23,18,58,.5)",
                   fontSize: ".85rem",
                   fontWeight: 300,
                   lineHeight: 1.75,
                   marginBottom: "2rem",
-                  opacity: scene2Visible ? 1 : 0,
+                  opacity: s2 ? 1 : 0,
                   transition: "opacity .6s .28s ease",
                 }}
               >
-                Nosy Komba, Nosy Tanikely, Lokobe... Explorez les trésors cachés
-                de l'île aux parfums et ses eaux turquoises.
+                Île aux Nattes, Baie d'Ampanihy, Piscines Naturelles... Explorez
+                le sanctuaire des baleines à bosse et ses eaux turquoise.
               </p>
             )}
-
-            {/* Séparateur animé */}
             <div
               style={{
                 width: "100%",
                 height: 1,
                 background:
-                  "linear-gradient(to left, rgba(167,139,250,.35), transparent)",
+                  "linear-gradient(to left, rgba(124,58,237,.3), transparent)",
                 marginBottom: isMobile ? ".75rem" : "1.25rem",
-                transform: scene2Visible ? "scaleX(1)" : "scaleX(0)",
+                transform: s2 ? "scaleX(1)" : "scaleX(0)",
                 transformOrigin: "right",
                 transition: "transform .6s .3s ease",
               }}
             />
-
-            {/* Destinations chips */}
             <div
               style={{
                 display: "flex",
@@ -611,29 +465,28 @@ export function SceneTexts() {
                 marginBottom: !isMobile ? "1.4rem" : 0,
               }}
             >
-              {["Nosy Komba", "Nosy Tanikely", "Lokobe", "Amparihy"].map(
-                (dest, i) => (
-                  <span
-                    key={dest}
-                    className="tech-chip"
-                    style={{
-                      border: "1px solid rgba(167,139,250,.16)",
-                      background: "rgba(167,139,250,.05)",
-                      color: "rgba(167,139,250,.65)",
-                      opacity: scene2Visible ? 1 : 0,
-                      transform: scene2Visible
-                        ? "translateY(0)"
-                        : "translateY(8px)",
-                      transition: `opacity .4s ${0.35 + i * 0.07}s ease, transform .4s ${0.35 + i * 0.07}s ease`,
-                    }}
-                  >
-                    {dest}
-                  </span>
-                ),
-              )}
+              {[
+                "Île aux Nattes",
+                "Baie d'Ampanihy",
+                "Piscines Naturelles",
+                "Ambodifotatra",
+              ].map((d, i) => (
+                <span
+                  key={d}
+                  className="tech-chip"
+                  style={{
+                    border: "1px solid rgba(124,58,237,.22)",
+                    background: "rgba(124,58,237,.06)",
+                    color: "#6d28d9",
+                    opacity: s2 ? 1 : 0,
+                    transform: s2 ? "translateY(0)" : "translateY(8px)",
+                    transition: `opacity .4s ${0.35 + i * 0.07}s ease, transform .4s ${0.35 + i * 0.07}s ease`,
+                  }}
+                >
+                  {d}
+                </span>
+              ))}
             </div>
-
-            {/* Feature rows */}
             {!isMobile && (
               <div
                 style={{
@@ -645,15 +498,15 @@ export function SceneTexts() {
               >
                 {[
                   { label: "Plages de sable blanc", delay: 420 },
-                  { label: "Eaux cristallines", delay: 490 },
-                  { label: "Réserves marines protégées", delay: 560 },
-                ].map(({ label, delay }) => (
+                  { label: "Sanctuaire des baleines", delay: 490 },
+                  { label: "Récifs coralliens protégés", delay: 560 },
+                ].map((f) => (
                   <FeatureRow
-                    key={label}
-                    label={label}
-                    color="#a78bfa"
-                    delay={delay}
-                    visible={scene2Visible}
+                    key={f.label}
+                    label={f.label}
+                    color="#7c3aed"
+                    delay={f.delay}
+                    visible={s2}
                   />
                 ))}
               </div>
@@ -661,11 +514,9 @@ export function SceneTexts() {
           </div>
         </div>
 
-        {/* ════════════════════════════════════════════════════════════════
-            SCENE 3 — ACTIVITÉS & AVENTURES
-        ════════════════════════════════════════════════════════════════ */}
+        {/* SCENE 3 — AVENTURES */}
         <div
-          ref={scene3Ref}
+          ref={r3}
           className="scene-3-text"
           style={{
             position: "absolute",
@@ -673,101 +524,74 @@ export function SceneTexts() {
             display: "flex",
             alignItems: "center",
             justifyContent: isMobile ? "center" : "flex-start",
-            padding: isMobile
-              ? "0 1.5rem 50vh"
-              : isTablet
-                ? `0 clamp(2rem,6vw,4rem) 35vh`
-                : `0 clamp(2rem,8vw,5rem)`,
+            padding: isMobile ? "0 1.5rem 50vh" : `0 clamp(2rem,8vw,5rem)`,
             opacity: 0,
           }}
         >
           <div className="scan-overlay" />
           <div
             style={{
-              maxWidth: isMobile ? "100%" : "460px",
+              maxWidth: isMobile ? "100%" : 460,
               textAlign: isMobile ? "center" : "left",
               position: "relative",
               zIndex: 1,
             }}
           >
-            {/* Label */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: ".65rem",
-                justifyContent: isMobile ? "center" : "flex-start",
-                marginBottom: "1.5rem",
-                opacity: scene3Visible ? 1 : 0,
-                transform: scene3Visible
-                  ? "translateX(0)"
-                  : "translateX(-16px)",
-                transition: "opacity .5s ease, transform .5s ease",
-              }}
-            ></div>
-
-            {/* Headline */}
             <div style={{ marginBottom: isMobile ? "1rem" : "1.6rem" }}>
               {[
                 { text: "Aventure.", weight: 900, cls: "", delay: 0.1 },
                 { text: "Culture.", weight: 200, cls: "g-blue", delay: 0.18 },
                 { text: "Détente.", weight: 200, cls: "", delay: 0.26 },
-              ].map(({ text, weight, cls, delay }) => (
+              ].map((h) => (
                 <h2
-                  key={text}
+                  key={h.text}
                   style={{
                     fontSize: isMobile
                       ? "clamp(1.6rem,7vw,2.4rem)"
                       : "clamp(2rem,4vw,3.2rem)",
-                    fontWeight: weight,
+                    fontWeight: h.weight,
                     lineHeight: 1.04,
                     letterSpacing: "-.035em",
                     marginBottom: ".1rem",
-                    opacity: scene3Visible ? 1 : 0,
-                    transform: scene3Visible
-                      ? "translateX(0)"
-                      : "translateX(-18px)",
-                    transition: `opacity .5s ${delay}s ease, transform .5s ${delay}s ease`,
+                    color: "#17123a",
+                    opacity: s3 ? 1 : 0,
+                    transform: s3 ? "translateX(0)" : "translateX(-18px)",
+                    transition: `opacity .5s ${h.delay}s ease, transform .5s ${h.delay}s ease`,
                   }}
                 >
-                  {cls ? <span className={cls}>{text}</span> : text}
+                  {h.cls ? <span className={h.cls}>{h.text}</span> : h.text}
                 </h2>
               ))}
             </div>
-
             {!isMobile && (
               <p
                 style={{
-                  color: "rgba(255,255,255,.32)",
+                  color: "rgba(23,18,58,.5)",
                   fontSize: ".85rem",
                   fontWeight: 300,
                   lineHeight: 1.75,
                   marginBottom: "2rem",
-                  opacity: scene3Visible ? 1 : 0,
+                  opacity: s3 ? 1 : 0,
                   transition: "opacity .6s .32s ease",
                 }}
               >
-                Ylang-ylang, rhum arrangé, marchés locaux et traditions
-                sakalava. Vivez des expériences authentiques avec nos guides
-                experts.
+                Baleines à bosse, cimetière des pirates, villages de pêcheurs et
+                cuisine malgache. Vivez des expériences authentiques avec nos
+                guides locaux.
               </p>
             )}
-
-            {/* Séparateur */}
             <div
               style={{
                 width: "100%",
                 height: 1,
                 background:
-                  "linear-gradient(to right, rgba(96,165,250,.35), transparent)",
+                  "linear-gradient(to right, rgba(37,99,235,.3), transparent)",
                 marginBottom: isMobile ? ".75rem" : "1.25rem",
-                transform: scene3Visible ? "scaleX(1)" : "scaleX(0)",
+                transform: s3 ? "scaleX(1)" : "scaleX(0)",
                 transformOrigin: "left",
                 transition: "transform .6s .3s ease",
               }}
             />
-
-            {/* Chips */}
             <div
               style={{
                 display: "flex",
@@ -777,26 +601,25 @@ export function SceneTexts() {
                 marginBottom: !isMobile ? "1.4rem" : 0,
               }}
             >
-              {["Plongée", "Snorkeling", "Randonnée", "Pêche"].map((act, i) => (
-                <span
-                  key={act}
-                  className="tech-chip"
-                  style={{
-                    border: "1px solid rgba(96,165,250,.16)",
-                    background: "rgba(96,165,250,.05)",
-                    color: "rgba(96,165,250,.65)",
-                    opacity: scene3Visible ? 1 : 0,
-                    transform: scene3Visible
-                      ? "translateY(0)"
-                      : "translateY(8px)",
-                    transition: `opacity .4s ${0.35 + i * 0.07}s ease, transform .4s ${0.35 + i * 0.07}s ease`,
-                  }}
-                >
-                  {act}
-                </span>
-              ))}
+              {["Safari baleines", "Plongée", "Pirogue", "Snorkeling"].map(
+                (a, i) => (
+                  <span
+                    key={a}
+                    className="tech-chip"
+                    style={{
+                      border: "1px solid rgba(37,99,235,.22)",
+                      background: "rgba(37,99,235,.06)",
+                      color: "#1d4ed8",
+                      opacity: s3 ? 1 : 0,
+                      transform: s3 ? "translateY(0)" : "translateY(8px)",
+                      transition: `opacity .4s ${0.35 + i * 0.07}s ease, transform .4s ${0.35 + i * 0.07}s ease`,
+                    }}
+                  >
+                    {a}
+                  </span>
+                ),
+              )}
             </div>
-
             {!isMobile && (
               <div
                 style={{
@@ -809,14 +632,14 @@ export function SceneTexts() {
                 {[
                   { label: "Guides locaux certifiés", delay: 420 },
                   { label: "Excursions sur mesure", delay: 490 },
-                  { label: "Transport inclus", delay: 560 },
-                ].map(({ label, delay }) => (
+                  { label: "Transferts inclus", delay: 560 },
+                ].map((f) => (
                   <FeatureRow
-                    key={label}
-                    label={label}
-                    color="#60a5fa"
-                    delay={delay}
-                    visible={scene3Visible}
+                    key={f.label}
+                    label={f.label}
+                    color="#2563eb"
+                    delay={f.delay}
+                    visible={s3}
                   />
                 ))}
               </div>
@@ -824,11 +647,9 @@ export function SceneTexts() {
           </div>
         </div>
 
-        {/* ════════════════════════════════════════════════════════════════
-            SCENE 4 — INFOS PRATIQUES
-        ════════════════════════════════════════════════════════════════ */}
+        {/* SCENE 4 — STATS */}
         <div
-          ref={scene4Ref}
+          ref={r4}
           className="scene-4-text"
           style={{
             position: "absolute",
@@ -844,40 +665,7 @@ export function SceneTexts() {
             padding: isMobile ? "0 1.5rem" : "0 2rem",
           }}
         >
-          <div
-            style={{ maxWidth: "720px", textAlign: "center", width: "100%" }}
-          >
-            {/* Label */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: ".75rem",
-                marginBottom: "2rem",
-                opacity: scene4Visible ? 1 : 0,
-                transition: "opacity .5s ease",
-              }}
-            >
-              <div
-                style={{
-                  width: isMobile ? "2rem" : "5rem",
-                  height: 1,
-                  background:
-                    "linear-gradient(to right,transparent,rgba(52,211,153,.35))",
-                }}
-              />
-              <div
-                style={{
-                  width: isMobile ? "2rem" : "5rem",
-                  height: 1,
-                  background:
-                    "linear-gradient(to left,transparent,rgba(52,211,153,.35))",
-                }}
-              />
-            </div>
-
-            {/* Stats */}
+          <div style={{ maxWidth: 720, textAlign: "center", width: "100%" }}>
             <div
               style={{
                 display: "flex",
@@ -889,48 +677,46 @@ export function SceneTexts() {
             >
               {[
                 {
-                  target: 50,
-                  suffix: "+",
-                  label: "Îles à explorer",
-                  color: "#a78bfa",
-                  sub: "Archipel paradisiaque",
-                  delay: 0,
-                },
-                {
-                  target: 28,
-                  suffix: "°C",
-                  label: "Température moyenne",
-                  color: "#34d399",
-                  sub: "Climat tropical",
-                  delay: 200,
-                },
-                {
                   target: 300,
                   suffix: "j",
                   label: "Jours de soleil",
-                  color: "#60a5fa",
+                  color: "#2563eb",
                   sub: "par an",
+                  delay: 0,
+                },
+                {
+                  target: 27,
+                  suffix: "°C",
+                  label: "Température du lagon",
+                  color: "#059669",
+                  sub: "eau turquoise",
+                  delay: 200,
+                },
+                {
+                  target: 2000,
+                  suffix: "+",
+                  label: "Baleines à bosse",
+                  color: "#7c3aed",
+                  sub: "juillet – octobre",
                   delay: 400,
                 },
-              ].map((stat, i) => (
+              ].map((st, i) => (
                 <div
-                  key={stat.label}
+                  key={st.label}
                   style={{
                     flex: 1,
                     borderRight:
                       !isMobile && i < 2
-                        ? "1px solid rgba(255,255,255,.06)"
+                        ? "1px solid rgba(23,18,58,.08)"
                         : "none",
                     borderBottom:
                       isMobile && i < 2
-                        ? "1px solid rgba(255,255,255,.06)"
+                        ? "1px solid rgba(23,18,58,.08)"
                         : "none",
                     padding: isMobile ? "1rem 0" : "0 2.5rem",
-                    opacity: scene4Visible ? 1 : 0,
-                    transform: scene4Visible
-                      ? "translateY(0)"
-                      : "translateY(16px)",
-                    transition: `opacity .5s ${stat.delay}ms ease, transform .5s ${stat.delay}ms ease`,
+                    opacity: s4 ? 1 : 0,
+                    transform: s4 ? "translateY(0)" : "translateY(16px)",
+                    transition: `opacity .5s ${st.delay}ms ease, transform .5s ${st.delay}ms ease`,
                   }}
                 >
                   <div
@@ -944,95 +730,62 @@ export function SceneTexts() {
                       marginBottom: ".45rem",
                     }}
                   >
-                    {scene4Visible ? (
+                    {s4 ? (
                       <AnimatedCounter
-                        target={stat.target}
-                        suffix={stat.suffix}
-                        color={stat.color}
+                        target={st.target}
+                        suffix={st.suffix}
+                        color={st.color}
                         duration={1400}
                       />
                     ) : (
-                      <span style={{ color: stat.color }}>0{stat.suffix}</span>
+                      <span style={{ color: st.color }}>0{st.suffix}</span>
                     )}
                   </div>
                   <div
                     style={{
                       fontSize: ".85rem",
                       fontWeight: 600,
-                      color: "rgba(255,255,255,.65)",
+                      color: "rgba(23,18,58,.72)",
                       marginBottom: ".25rem",
                     }}
                   >
-                    {stat.label}
+                    {st.label}
                   </div>
                   <span className="hud" style={{ fontSize: ".46rem" }}>
-                    {stat.sub}
+                    {st.sub}
                   </span>
                 </div>
               ))}
             </div>
-
-            {/* Barre de progression */}
-            {!isMobile && (
-              <div
-                style={{
-                  position: "relative",
-                  width: "55%",
-                  height: 2,
-                  margin: "0 auto 1.5rem",
-                  background: "rgba(255,255,255,.05)",
-                  borderRadius: 1,
-                  overflow: "hidden",
-                }}
-              >
-                <div
-                  style={{
-                    position: "absolute",
-                    left: 0,
-                    top: 0,
-                    height: "100%",
-                    background:
-                      "linear-gradient(90deg,#a78bfa,#34d399,#60a5fa)",
-                    borderRadius: 1,
-                    width: scene4Visible ? "92%" : "0",
-                    transition: "width 1.2s .6s ease",
-                  }}
-                />
-              </div>
-            )}
-
             <p
               style={{
-                color: "rgba(255,255,255,.25)",
+                color: "rgba(23,18,58,.4)",
                 fontWeight: 300,
                 fontSize: isMobile ? ".78rem" : ".88rem",
                 letterSpacing: ".06em",
-                opacity: scene4Visible ? 1 : 0,
+                opacity: s4 ? 1 : 0,
                 transition: "opacity .6s .7s ease",
               }}
             >
-              Une destination exceptionnelle toute l'année.
+              L'île aux baleines vous attend toute l'année.
             </p>
           </div>
         </div>
 
-        {/* Overlay */}
         <div
           className="scene-5-overlay"
           style={{
             position: "absolute",
             inset: 0,
-            background: "#050505",
+            background: "#fbfaff",
             opacity: 0,
             zIndex: 10,
           }}
         />
 
-        {/* ════════════════════════════════════════════════════════════════
-            SCENE 5 — DÉCOUVERTE
-        ════════════════════════════════════════════════════════════════ */}
+        {/* SCENE 5 — DÉCOUVERTE */}
         <div
-          ref={scene5Ref}
+          ref={r5}
           className="scene-5-discover"
           style={{
             position: "absolute",
@@ -1047,23 +800,6 @@ export function SceneTexts() {
           }}
         >
           <div className="scan-overlay" />
-
-          {/* Ligne d'entrée */}
-          <div
-            style={{
-              width: 1,
-              height: isMobile ? "2rem" : "3rem",
-              background:
-                "linear-gradient(to bottom,transparent,rgba(167,139,250,.55))",
-              marginBottom: "1.5rem",
-              opacity: scene5Visible ? 1 : 0,
-              transform: scene5Visible ? "scaleY(1)" : "scaleY(0)",
-              transformOrigin: "top",
-              transition: "opacity .5s ease, transform .5s ease",
-            }}
-          />
-
-          {/* Label */}
           <span
             className="mono"
             style={{
@@ -1071,16 +807,14 @@ export function SceneTexts() {
               fontWeight: 700,
               letterSpacing: ".38em",
               textTransform: "uppercase",
-              color: "rgba(167,139,250,.55)",
+              color: "#7c3aed",
               marginBottom: "1.5rem",
-              opacity: scene5Visible ? 1 : 0,
+              opacity: s5 ? 1 : 0,
               transition: "opacity .5s .1s ease",
             }}
           >
-            EXPLOREZ NOSY BE HELL VILLE
+            EXPLOREZ SAINTE-MARIE
           </span>
-
-          {/* Titre */}
           <h2
             style={{
               fontSize: isMobile
@@ -1091,8 +825,9 @@ export function SceneTexts() {
               lineHeight: 1.06,
               letterSpacing: "-.025em",
               marginBottom: ".2rem",
-              opacity: scene5Visible ? 1 : 0,
-              transform: scene5Visible ? "translateY(0)" : "translateY(14px)",
+              color: "#17123a",
+              opacity: s5 ? 1 : 0,
+              transform: s5 ? "translateY(0)" : "translateY(14px)",
               transition: "opacity .5s .15s ease, transform .5s .15s ease",
             }}
           >
@@ -1109,21 +844,20 @@ export function SceneTexts() {
               letterSpacing: "-.05em",
               lineHeight: 1,
               marginBottom: "2.5rem",
-              opacity: scene5Visible ? 1 : 0,
-              transform: scene5Visible ? "translateY(0)" : "translateY(14px)",
+              color: "#17123a",
+              opacity: s5 ? 1 : 0,
+              transform: s5 ? "translateY(0)" : "translateY(14px)",
               transition: "opacity .5s .22s ease, transform .5s .22s ease",
             }}
           >
             nos expériences.
           </h2>
-
-          {/* Grille expériences */}
           <div
             style={{
               display: "grid",
               gridTemplateColumns: isMobile ? "repeat(2,1fr)" : "repeat(3,1fr)",
               gap: isMobile ? ".45rem" : ".65rem",
-              maxWidth: isMobile ? "300px" : "660px",
+              maxWidth: isMobile ? 300 : 660,
               width: "100%",
               padding: "0 1.5rem",
             }}
@@ -1132,56 +866,55 @@ export function SceneTexts() {
               {
                 icon: "◆",
                 name: "Excursions",
-                desc: "Îles & Plages",
-                color: "#a78bfa",
+                desc: "Baleines & baies",
+                color: "#7c3aed",
               },
               {
                 icon: "◈",
                 name: "Plongée",
-                desc: "Réserves marines",
-                color: "#60a5fa",
+                desc: "Récifs & épaves",
+                color: "#2563eb",
               },
               {
                 icon: "◇",
                 name: "Hébergements",
-                desc: "Lodges & Hôtels",
-                color: "#c084fc",
+                desc: "Lodges & bungalows",
+                color: "#9333ea",
               },
               {
                 icon: "▸",
                 name: "Culture",
-                desc: "Marchés locaux",
-                color: "#34d399",
+                desc: "Pirates & villages",
+                color: "#059669",
               },
               {
                 icon: "▹",
                 name: "Nature",
-                desc: "Réserves & Forêts",
-                color: "#f472b6",
+                desc: "Île aux Nattes",
+                color: "#db2777",
               },
               {
                 icon: "◻",
                 name: "Gastronomie",
                 desc: "Saveurs malgaches",
-                color: "#fb923c",
+                color: "#ea580c",
               },
             ].map((s, i) => (
               <div
                 key={s.name}
                 style={{
                   padding: isMobile ? ".6rem .5rem" : ".75rem .9rem",
-                  borderRadius: "5px",
-                  border: "1px solid rgba(255,255,255,.055)",
-                  background: "rgba(255,255,255,.012)",
+                  borderRadius: 10,
+                  border: "1px solid rgba(23,18,58,.08)",
+                  background: "rgba(255,255,255,.75)",
+                  boxShadow: "0 4px 16px rgba(76,29,149,.05)",
                   backdropFilter: "blur(4px)",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: isMobile ? "center" : "flex-start",
                   gap: ".28rem",
-                  opacity: scene5Visible ? 1 : 0,
-                  transform: scene5Visible
-                    ? "translateY(0)"
-                    : "translateY(12px)",
+                  opacity: s5 ? 1 : 0,
+                  transform: s5 ? "translateY(0)" : "translateY(12px)",
                   transition: `opacity .4s ${0.28 + i * 0.06}s ease, transform .4s ${0.28 + i * 0.06}s ease`,
                 }}
               >
@@ -1192,7 +925,7 @@ export function SceneTexts() {
                     gap: ".45rem",
                   }}
                 >
-                  <span style={{ fontSize: ".55rem", color: s.color }}>
+                  <span style={{ fontSize: ".6rem", color: s.color }}>
                     {s.icon}
                   </span>
                   <span
@@ -1202,7 +935,7 @@ export function SceneTexts() {
                       fontWeight: 700,
                       letterSpacing: ".1em",
                       textTransform: "uppercase",
-                      color: "rgba(255,255,255,.62)",
+                      color: "rgba(23,18,58,.75)",
                     }}
                   >
                     {s.name}
@@ -1220,8 +953,6 @@ export function SceneTexts() {
               </div>
             ))}
           </div>
-
-          {/* Footer */}
           <div
             style={{
               position: "absolute",
@@ -1230,7 +961,7 @@ export function SceneTexts() {
               flexDirection: "column",
               alignItems: "center",
               gap: ".75rem",
-              opacity: scene5Visible ? 1 : 0,
+              opacity: s5 ? 1 : 0,
               transition: "opacity .5s .6s ease",
             }}
           >
@@ -1239,7 +970,7 @@ export function SceneTexts() {
                 width: 1,
                 height: "2rem",
                 background:
-                  "linear-gradient(to bottom,rgba(167,139,250,.35),transparent)",
+                  "linear-gradient(to bottom,rgba(124,58,237,.4),transparent)",
               }}
             />
             <span
@@ -1247,70 +978,12 @@ export function SceneTexts() {
               style={{
                 fontSize: ".46rem",
                 letterSpacing: ".35em",
-                color: "rgba(255,255,255,.15)",
+                color: "rgba(23,18,58,.3)",
               }}
             >
               CONTINUEZ ↓
             </span>
           </div>
-
-          {/* Coins */}
-          {!isMobile && (
-            <>
-              <div
-                style={{
-                  position: "absolute",
-                  top: "4rem",
-                  left: "2rem",
-                  width: 24,
-                  height: 24,
-                  borderTop: "1px solid rgba(167,139,250,.12)",
-                  borderLeft: "1px solid rgba(167,139,250,.12)",
-                  opacity: scene5Visible ? 1 : 0,
-                  transition: "opacity .5s .5s ease",
-                }}
-              />
-              <div
-                style={{
-                  position: "absolute",
-                  top: "4rem",
-                  right: "2rem",
-                  width: 24,
-                  height: 24,
-                  borderTop: "1px solid rgba(167,139,250,.12)",
-                  borderRight: "1px solid rgba(167,139,250,.12)",
-                  opacity: scene5Visible ? 1 : 0,
-                  transition: "opacity .5s .55s ease",
-                }}
-              />
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: "4rem",
-                  left: "2rem",
-                  width: 24,
-                  height: 24,
-                  borderBottom: "1px solid rgba(167,139,250,.12)",
-                  borderLeft: "1px solid rgba(167,139,250,.12)",
-                  opacity: scene5Visible ? 1 : 0,
-                  transition: "opacity .5s .6s ease",
-                }}
-              />
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: "4rem",
-                  right: "2rem",
-                  width: 24,
-                  height: 24,
-                  borderBottom: "1px solid rgba(167,139,250,.12)",
-                  borderRight: "1px solid rgba(167,139,250,.12)",
-                  opacity: scene5Visible ? 1 : 0,
-                  transition: "opacity .5s .65s ease",
-                }}
-              />
-            </>
-          )}
         </div>
       </div>
     </>,

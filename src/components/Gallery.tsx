@@ -4,39 +4,38 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { X, ZoomIn, Camera, MapPin } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-
 gsap.registerPlugin(ScrollTrigger);
 
 const photos = [
   {
     id: 1,
-    src: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
-    title: "Baie de Nosy Be",
-    location: "Hell Ville",
+    src: "/textures/sainte-marie-hero.png",
+    title: "Sanctuaire des baleines",
+    location: "Canal de Sainte-Marie",
     category: "Paysages",
     span: "col-span-2 row-span-2",
   },
   {
     id: 2,
-    src: "https://images.unsplash.com/photo-1546182990-dffeafbe841d?auto=format&fit=crop&w=800&q=80",
-    title: "Lémurien Maki",
-    location: "Nosy Komba",
-    category: "Faune",
+    src: "/textures/sainte-marie-activites.jpg",
+    title: "Safari baleines",
+    location: "Baie des baleines",
+    category: "Activités",
     span: "col-span-1 row-span-1",
   },
   {
     id: 3,
     src: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80",
     title: "Plongée sous-marine",
-    location: "Nosy Tanikely",
+    location: "Récifs coralliens",
     category: "Activités",
     span: "col-span-1 row-span-1",
   },
   {
     id: 4,
-    src: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=800&q=80",
-    title: "Plage paradisiaque",
-    location: "Amparihy",
+    src: "/textures/sainte-marie-plages.jpg",
+    title: "Pirogues traditionnelles",
+    location: "Île aux Nattes",
     category: "Plages",
     span: "col-span-1 row-span-2",
   },
@@ -44,39 +43,31 @@ const photos = [
     id: 5,
     src: "https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&w=800&q=80",
     title: "Eaux turquoises",
-    location: "Nosy Iranja",
+    location: "Piscines naturelles",
     category: "Plages",
     span: "col-span-1 row-span-1",
   },
   {
     id: 6,
-    src: "https://images.unsplash.com/photo-1506953823976-52e1fdc0149a?auto=format&fit=crop&w=800&q=80",
-    title: "Pirogues traditionnelles",
-    location: "Hell Ville",
-    category: "Culture",
+    src: "/decor/cove.jpg",
+    title: "Crique verdoyante",
+    location: "Côte ouest",
+    category: "Paysages",
     span: "col-span-2 row-span-1",
   },
   {
     id: 7,
-    src: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80",
+    src: "/textures/sainte-marie-coucher.jpg",
     title: "Coucher de soleil",
-    location: "Ambatoloaka",
+    location: "Île aux Nattes",
     category: "Paysages",
     span: "col-span-1 row-span-1",
   },
   {
     id: 8,
-    src: "https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?auto=format&fit=crop&w=800&q=80",
-    title: "Fleurs d'Ylang-Ylang",
-    location: "Plantations",
-    category: "Nature",
-    span: "col-span-1 row-span-1",
-  },
-  {
-    id: 9,
     src: "https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=800&q=80",
     title: "Marché local",
-    location: "Hell Ville",
+    location: "Ambodifotatra",
     category: "Culture",
     span: "col-span-2 row-span-1",
   },
@@ -84,22 +75,11 @@ const photos = [
 
 export function Gallery() {
   const container = useRef<HTMLDivElement>(null);
-  const [selectedPhoto, setSelectedPhoto] = useState<(typeof photos)[0] | null>(
-    null,
-  );
-  const [activeFilter, setActiveFilter] = useState("Tous");
-  const filters = [
-    "Tous",
-    "Plages",
-    "Faune",
-    "Culture",
-    "Paysages",
-    "Activités",
-  ];
-  const filteredPhotos =
-    activeFilter === "Tous"
-      ? photos
-      : photos.filter((p) => p.category === activeFilter);
+  const [selected, setSelected] = useState<(typeof photos)[0] | null>(null);
+  const [filter, setFilter] = useState("Tous");
+  const filters = ["Tous", "Plages", "Paysages", "Culture", "Activités"];
+  const shown =
+    filter === "Tous" ? photos : photos.filter((p) => p.category === filter);
 
   useEffect(() => {
     if (!container.current) return;
@@ -128,82 +108,80 @@ export function Gallery() {
   return (
     <section
       ref={container}
-      className="py-32 px-4 md:px-12 lg:px-24 bg-[#050505] relative z-20 border-t border-white/5"
+      className="py-32 px-4 md:px-12 lg:px-24 bg-[#fbfaff] relative z-20 border-t border-slate-100"
     >
       <div className="max-w-7xl mx-auto">
         <div className="mb-16 text-center">
-          <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-violet-500/10 border border-violet-500/20">
-            <Camera className="w-4 h-4 text-violet-400" />
-            <span className="text-xs uppercase tracking-widest text-violet-400 font-bold">
+          <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-violet-50 border border-violet-200">
+            <Camera className="w-4 h-4 text-violet-600" />
+            <span className="text-xs uppercase tracking-widest text-violet-700 font-bold">
               Galerie Photo
             </span>
           </div>
-          <h2 className="text-4xl md:text-6xl font-light mb-6 tracking-tight">
-            L'île aux parfums{" "}
-            <span className="italic font-serif text-violet-400">en images</span>
+          <h2 className="text-4xl md:text-6xl font-light mb-6 tracking-tight text-[#17123a]">
+            L'île aux baleines{" "}
+            <span className="italic font-serif text-violet-600">en images</span>
           </h2>
-          <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto font-light">
-            Découvrez la beauté envoûtante de Nosy Be à travers notre collection
-            de photographies
+          <p className="text-[#17123a]/50 text-lg md:text-xl max-w-2xl mx-auto font-light">
+            Découvrez la beauté de Sainte-Marie à travers notre collection de
+            photographies.
           </p>
         </div>
         <div className="flex flex-wrap justify-center gap-3 mb-12">
-          {filters.map((filter) => (
+          {filters.map((f) => (
             <button
-              key={filter}
-              onClick={() => setActiveFilter(filter)}
-              className={`px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 ${activeFilter === filter ? "bg-violet-600 text-white shadow-lg shadow-violet-500/30" : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"}`}
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 ${filter === f ? "bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-500/30" : "bg-white border border-slate-200 text-[#17123a]/55 hover:bg-slate-50"}`}
             >
-              {filter}
+              {f}
             </button>
           ))}
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[200px] md:auto-rows-[250px]">
-          {filteredPhotos.map((photo) => (
+          {shown.map((p) => (
             <motion.div
-              key={photo.id}
+              key={p.id}
               layout
-              className={`gallery-item relative overflow-hidden rounded-xl cursor-pointer group ${photo.span}`}
-              onClick={() => setSelectedPhoto(photo)}
+              className={`gallery-item relative overflow-hidden rounded-xl cursor-pointer group ${p.span}`}
+              onClick={() => setSelected(p)}
               whileHover={{ scale: 0.98 }}
             >
               <img
-                src={photo.src}
-                alt={photo.title}
+                src={p.src}
+                alt={p.title}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <div className="absolute inset-0 flex flex-col justify-end p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <div className="flex items-center gap-2 mb-1">
-                  <MapPin className="w-3 h-3 text-violet-400" />
-                  <span className="text-xs text-white/70">
-                    {photo.location}
-                  </span>
+                  <MapPin className="w-3 h-3 text-violet-300" />
+                  <span className="text-xs text-white/80">{p.location}</span>
                 </div>
-                <h3 className="text-white font-semibold">{photo.title}</h3>
-                <span className="text-xs text-violet-400 uppercase tracking-wider mt-1">
-                  {photo.category}
+                <h3 className="text-white font-semibold">{p.title}</h3>
+                <span className="text-xs text-violet-300 uppercase tracking-wider mt-1">
+                  {p.category}
                 </span>
               </div>
-              <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <ZoomIn className="w-4 h-4 text-white" />
+              <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm">
+                <ZoomIn className="w-4 h-4 text-[#17123a]" />
               </div>
             </motion.div>
           ))}
         </div>
       </div>
       <AnimatePresence>
-        {selectedPhoto && (
+        {selected && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[99999] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4"
-            onClick={() => setSelectedPhoto(null)}
+            className="fixed inset-0 z-[99999] bg-[#0c0a17]/92 backdrop-blur-xl flex items-center justify-center p-4"
+            onClick={() => setSelected(null)}
           >
             <button
-              onClick={() => setSelectedPhoto(null)}
-              className="absolute top-6 right-6 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+              className="absolute top-6 right-6 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center"
+              onClick={() => setSelected(null)}
             >
               <X className="w-6 h-6 text-white" />
             </button>
@@ -215,20 +193,20 @@ export function Gallery() {
               onClick={(e) => e.stopPropagation()}
             >
               <img
-                src={selectedPhoto.src.replace("w=800", "w=1600")}
-                alt={selectedPhoto.title}
+                src={selected.src}
+                alt={selected.title}
                 className="w-full h-auto max-h-[80vh] object-contain rounded-2xl"
               />
               <div className="mt-6 text-center">
                 <h3 className="text-2xl font-light text-white mb-2">
-                  {selectedPhoto.title}
+                  {selected.title}
                 </h3>
                 <div className="flex items-center justify-center gap-2 text-white/60">
                   <MapPin className="w-4 h-4 text-violet-400" />
-                  <span>{selectedPhoto.location}</span>
+                  <span>{selected.location}</span>
                   <span className="text-violet-400">•</span>
                   <span className="uppercase tracking-wider text-xs">
-                    {selectedPhoto.category}
+                    {selected.category}
                   </span>
                 </div>
               </div>
