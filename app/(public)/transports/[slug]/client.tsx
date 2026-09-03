@@ -4,52 +4,49 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
-  Clock,
   Check,
   Plus,
-  Utensils,
   CarFront,
+  Users,
+  UserCheck,
+  CalendarDays,
+  Plane,
+  Ship,
+  Car,
+  Bike,
+  Gauge,
 } from "lucide-react";
-import type { Excursion } from "@prisma/client";
+import type { TransportOption } from "@prisma/client";
 import { useQuoteStore } from "@/src/store/quote-store";
 import { formatMGA } from "@/src/lib/pricing";
 import { cn } from "@/src/lib/utils";
 
-const FALLBACK_IMAGES: Record<string, string> = {
-  "safari-baleines":
-    "https://images.unsplash.com/photo-1517783999520-f068d7431a60?w=800&q=80",
-  "baie-ampanihy":
-    "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80",
-  "ile-aux-nattes":
-    "https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?w=800&q=80",
-  "piscines-naturelles":
-    "https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=800&q=80",
-  "maison-blanche":
-    "https://images.unsplash.com/photo-1528127269322-539801943592?w=800&q=80",
-  "plongee-sous-marine":
-    "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800&q=80",
-};
+function getIcon(slug: string) {
+  if (slug.includes("aeroport")) return Plane;
+  if (slug.includes("port")) return Ship;
+  if (slug.includes("4x4")) return CarFront;
+  if (slug.includes("quad")) return Gauge;
+  if (slug.includes("scooter")) return Bike;
+  return Car;
+}
 
-export default function ExcursionDetailsClient({
-  excursion,
+export default function TransportDetailsClient({
+  transport,
 }: {
-  excursion: Excursion;
+  transport: TransportOption;
 }) {
-  const { excursionIds, toggleExcursion, guests } = useQuoteStore();
-  const selected = excursionIds.includes(excursion.id);
-
-  const imageUrl =
-    FALLBACK_IMAGES[excursion.slug] ??
-    "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80";
+  const { transportIds, toggleTransport } = useQuoteStore();
+  const selected = transportIds.includes(transport.id);
+  const Icon = getIcon(transport.slug);
 
   return (
     <div className="mx-auto max-w-7xl px-4 pb-16 pt-28 md:px-8 md:pt-32">
       <Link
-        href="/excursions"
+        href="/transports"
         className="mb-8 inline-flex items-center gap-2 text-sm font-semibold text-[#17123a]/55 transition hover:text-violet-600"
       >
         <ArrowLeft className="size-4" />
-        Retour aux excursions
+        Retour aux transports
       </Link>
 
       <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_400px]">
@@ -61,12 +58,13 @@ export default function ExcursionDetailsClient({
             transition={{ duration: 0.6 }}
             className="mb-8"
           >
-            <div className="relative h-96 overflow-hidden rounded-3xl border border-slate-200 shadow-lg shadow-violet-900/10">
-              <img
-                src={imageUrl}
-                alt={excursion.name}
-                className="h-full w-full object-cover"
-              />
+            <div className="relative flex h-64 items-center justify-center overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-violet-50 to-indigo-50 shadow-lg shadow-violet-900/10">
+              <Icon className="size-24 text-violet-400/60" />
+              <div className="absolute bottom-4 right-4 flex items-center gap-2 rounded-full bg-white/90 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-violet-700 backdrop-blur-sm shadow-sm">
+                {transport.transportType === "TRANSFER"
+                  ? "Transfert"
+                  : "Location"}
+              </div>
             </div>
           </motion.div>
 
@@ -77,28 +75,32 @@ export default function ExcursionDetailsClient({
             className="mb-8"
           >
             <h1 className="mb-4 text-4xl font-black tracking-tight text-[#17123a] md:text-5xl">
-              {excursion.name}
+              {transport.name}
             </h1>
 
             <div className="mb-6 flex flex-wrap gap-3">
               <span className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-[#17123a]/70 shadow-sm">
-                <Clock className="size-4 text-violet-600" />
-                {excursion.duration}
+                <CalendarDays className="size-4 text-violet-600" />
+                {transport.unit === "DAY"
+                  ? "Tarif à la journée"
+                  : "Tarif au trajet"}
               </span>
-              {excursion.includesLunch && (
-                <span className="flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-700">
-                  <Utensils className="size-4" /> Déjeuner inclus
+              {transport.withDriver && (
+                <span className="flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700">
+                  <UserCheck className="size-4" /> Chauffeur inclus
                 </span>
               )}
-              {excursion.includesTransfer && (
-                <span className="flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700">
-                  <CarFront className="size-4" /> Transfert inclus
+              {transport.capacity && (
+                <span className="flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-700">
+                  <Users className="size-4" /> {transport.capacity} passagers
+                  max
                 </span>
               )}
             </div>
 
             <p className="max-w-2xl text-base leading-relaxed text-[#17123a]/60">
-              {excursion.descriptionFr}
+              {transport.descriptionFr ||
+                "Profitez d'un transport confortable et sécurisé pour vos déplacements à Sainte-Marie."}
             </p>
           </motion.div>
         </div>
@@ -116,20 +118,29 @@ export default function ExcursionDetailsClient({
             </h3>
             <div className="mb-6">
               <div className="text-3xl font-black text-violet-600">
-                {formatMGA(excursion.pricePerPerson)}
+                {formatMGA(transport.price)}
               </div>
-              <div className="text-xs text-[#17123a]/40">par personne</div>
+              <div className="text-xs text-[#17123a]/40">
+                {transport.unit === "DAY" ? "par jour" : "par trajet"}
+              </div>
             </div>
 
             <div className="mb-6 rounded-xl bg-violet-50 p-4 text-sm text-violet-700">
-              Pour {guests} personne{guests > 1 ? "s" : ""} :{" "}
-              <span className="font-bold">
-                {formatMGA(excursion.pricePerPerson * guests)}
-              </span>
+              {transport.unit === "DAY" ? (
+                <>
+                  Les locations à la journée seront calculées automatiquement
+                  selon la durée de votre séjour lors de la validation du devis.
+                </>
+              ) : (
+                <>
+                  Ce tarif s'applique pour un trajet simple (ex: aéroport vers
+                  votre hôtel).
+                </>
+              )}
             </div>
 
             <button
-              onClick={() => toggleExcursion(excursion.id)}
+              onClick={() => toggleTransport(transport.id)}
               className={cn(
                 "flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold uppercase tracking-widest transition",
                 selected
