@@ -5,6 +5,7 @@ import {
   ServiceUnit,
 } from "@prisma/client";
 import * as bcrypt from "bcryptjs";
+import { pathToFileURL } from "node:url";
 
 const prisma = new PrismaClient();
 
@@ -709,11 +710,18 @@ async function main() {
   console.log("📋 Identifiants admin : admin@sainte-marie.mg / admin123");
 }
 
-main()
-  .catch((e) => {
-    console.error("❌ Erreur lors du seed :", e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+export { main as seedDatabase };
+
+const isDirectRun =
+  process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+
+if (isDirectRun) {
+  main()
+    .catch((e) => {
+      console.error("❌ Erreur lors du seed :", e);
+      process.exit(1);
+    })
+    .finally(async () => {
+      await prisma.$disconnect();
+    });
+}
