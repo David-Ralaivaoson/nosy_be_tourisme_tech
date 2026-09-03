@@ -30,6 +30,8 @@ export async function GET() {
       accommodationId: accommodation?.id ?? null,
       excursionIds: excursion ? [excursion.id] : [],
       transportIds: transport ? [transport.id] : [],
+      serviceIds: [], // ← AJOUTÉ
+      itemQuantities: {}, // ← AJOUTÉ
       notes: "Test API route",
     });
 
