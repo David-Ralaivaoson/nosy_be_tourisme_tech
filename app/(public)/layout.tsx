@@ -4,6 +4,9 @@ import { Footer } from "@/src/components/shared/Footer";
 import WhatsAppFloat from "@/src/components/shared/WhatsAppFloat";
 import QuoteWidget from "@/src/components/shared/QuoteWidget";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 60; // pages re-générées toutes les 60 s max
+
 export default function PublicLayout({
   children,
 }: {
